@@ -26,11 +26,10 @@ def send_telegram(message):
             print("Telegram Error:", e)
 
 def fetch_data(symbol, timeframe, limit=1000):
-    exchange = ccxt.lbank({
-        'apiKey': '9b10e6dd-5ace-41e2-a3b8-d8681aea7cc3',
-        'secret': '',  # Not needed for public OHLCV, but ccxt likes it empty instead of missing sometimes
+    # We use Kraken because it provides reliable public OHLCV data without Cloudflare IP blocks on GitHub Actions
+    exchange = ccxt.kraken({
         'enableRateLimit': True,
-        'timeout': 60000, # 60 seconds timeout to prevent infinite hanging
+        'timeout': 60000,
     })
     
     # LBank requires slash format for pairs (e.g., 'BTC/USDT')
