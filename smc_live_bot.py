@@ -7,39 +7,52 @@ import datetime
 import os
 import requests
 import json
+import time
+import subprocess
 
 TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN", "8233036914:AAF699ijYWDwJebEKu__CH6QUrNvLx2TPnA")
 TELEGRAM_CHAT_ID = os.getenv("TELEGRAM_CHAT_ID", "5708853617")
 PAPER_TRADE_START = pd.to_datetime(os.getenv("PAPER_TRADE_START", datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")))
 
-def send_telegram(message):
+def send_telegram(message, max_retries=3):
     print(message)
     if TELEGRAM_BOT_TOKEN and TELEGRAM_CHAT_ID:
         url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendMessage"
-        try:
-            # Truncate message to avoid Telegram's 4096 char limit if there's a huge HTML error
-            if len(message) > 4000:
-                message = message[:4000] + "... (truncated)"
-            response = requests.post(url, json={"chat_id": TELEGRAM_CHAT_ID, "text": message}, timeout=10)
-            response.raise_for_status()
-        except Exception as e:
-            print("Telegram Error:", e)
+        for attempt in range(max_retries):
+            try:
+                # Truncate message to avoid Telegram's 4096 char limit if there's a huge HTML error
+                if len(message) > 4000:
+                    message = message[:4000] + "... (truncated)"
+                response = requests.post(url, json={"chat_id": TELEGRAM_CHAT_ID, "text": message}, timeout=10)
+                response.raise_for_status()
+                return
+            except Exception as e:
+                print(f"Telegram Error (Attempt {attempt+1}/{max_retries}): {e}")
+                if attempt < max_retries - 1:
+                    time.sleep(3)
 
-def fetch_data(symbol, timeframe, limit=1000):
-    # We use Kraken because it provides reliable public OHLCV data without Cloudflare IP blocks on GitHub Actions
-    exchange = ccxt.kraken({
-        'enableRateLimit': True,
-        'timeout': 60000,
-    })
-    
-    # LBank requires slash format for pairs (e.g., 'BTC/USDT')
-    ccxt_symbol = symbol.replace('USDT', '/USDT')
-    
-    ohlcv = exchange.fetch_ohlcv(ccxt_symbol, timeframe, limit=limit)
-    df = pd.DataFrame(ohlcv, columns=['timestamp', 'open', 'high', 'low', 'close', 'volume'])
-    df['timestamp'] = pd.to_datetime(df['timestamp'], unit='ms')
-    df.set_index('timestamp', inplace=True)
-    return df.iloc[:-1]
+def fetch_data(symbol, timeframe, limit=1000, max_retries=3):
+    for attempt in range(max_retries):
+        try:
+            # We use Kraken because it provides reliable public OHLCV data without Cloudflare IP blocks on GitHub Actions
+            exchange = ccxt.kraken({
+                'enableRateLimit': True,
+                'timeout': 60000,
+            })
+            
+            # LBank requires slash format for pairs (e.g., 'BTC/USDT')
+            ccxt_symbol = symbol.replace('USDT', '/USDT')
+            
+            ohlcv = exchange.fetch_ohlcv(ccxt_symbol, timeframe, limit=limit)
+            df = pd.DataFrame(ohlcv, columns=['timestamp', 'open', 'high', 'low', 'close', 'volume'])
+            df['timestamp'] = pd.to_datetime(df['timestamp'], unit='ms')
+            df.set_index('timestamp', inplace=True)
+            return df.iloc[:-1]
+        except Exception as e:
+            print(f"Kraken Fetch Error for {symbol} (Attempt {attempt+1}/{max_retries}): {e}")
+            if attempt == max_retries - 1:
+                raise e
+            time.sleep(5)
 
 def compute_indicators(df):
     df_4h = df['close'].resample('4h').last()
@@ -286,6 +299,23 @@ def get_live_state(df, tick_size, symbol):
         'completed_trades': completed_trades
     }
 
+def save_and_push_state(state_data, state_file='state.json'):
+    # Save local
+    with open(state_file, 'w') as f:
+        json.dump(state_data, f, indent=4)
+        
+    # Commit and push synchronously to ensure 100% data safety
+    try:
+        subprocess.run(["git", "add", state_file], check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        status = subprocess.run(["git", "status", "--porcelain"], capture_output=True, text=True)
+        if state_file in status.stdout:
+            subprocess.run(["git", "commit", "-m", "Auto-update state.json [skip ci]"], check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+            subprocess.run(["git", "pull", "--rebase"], check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+            subprocess.run(["git", "push"], check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+            print("State successfully synced to GitHub.")
+    except Exception as e:
+        print(f"Git Sync Error: {e}")
+
 def run_portfolio():
     portfolio = {
         'BTCUSDT': {'tf': '30m', 'risk': 0.0279},
@@ -304,13 +334,24 @@ def run_portfolio():
         }
         
     initial_balance_run = state_data['balance']
-    # send_telegram("🔥 **SMC Aggressive Bot (Paper Trading) Started** 🔥") # حذف پیام اسپم استارت
     
     any_action = False
+    now = datetime.datetime.utcnow()
+    current_minute = now.minute
+    last_15m_mark = (current_minute // 15) * 15
     
     for symbol, info in portfolio.items():
         try:
             tf = info['tf']
+            
+            # Timeframe alignment check
+            if tf == '30m' and last_15m_mark % 30 != 0:
+                print(f"Skipping {symbol} ({tf}) as it does not align with the current 30m candle.")
+                continue
+            if tf == '1h' and last_15m_mark % 60 != 0:
+                print(f"Skipping {symbol} ({tf}) as it does not align with the current 1h candle.")
+                continue
+                
             risk = info['risk']
             df = fetch_data(symbol, tf)
             tick = df['close'].diff().abs().replace(0, np.nan).min()
@@ -363,9 +404,8 @@ def run_portfolio():
             send_telegram(f"❌ Error processing {symbol}: {error_str}")
             any_action = True
             
-    # Save State
-    with open(state_file, 'w') as f:
-        json.dump(state_data, f, indent=4)
+    # Save State and Sync to GitHub Safely
+    save_and_push_state(state_data, state_file)
         
     # Summary (only if balance changed or nothing happened)
     if state_data['balance'] != initial_balance_run:
@@ -392,8 +432,11 @@ def run_continuous():
         next_run = next_run + datetime.timedelta(minutes=1)
         
         sleep_seconds = (next_run - now).total_seconds()
-        print(f"Sleeping for {sleep_seconds} seconds until {next_run} UTC...")
-        time.sleep(sleep_seconds)
+        if sleep_seconds > 0:
+            print(f"Sleeping for {sleep_seconds} seconds until {next_run} UTC...")
+            time.sleep(sleep_seconds)
+        else:
+            print(f"Missed the execution window for {next_run} UTC, running immediately.")
 
 if __name__ == '__main__':
     import sys

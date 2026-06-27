@@ -6,6 +6,10 @@ on:
     - cron: '0 */5 * * *'
   workflow_dispatch:
 
+concurrency:
+  group: smc-bot
+  cancel-in-progress: true
+
 jobs:
   run-bot:
     runs-on: ubuntu-latest
@@ -32,14 +36,8 @@ jobs:
         TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
         PAPER_TRADE_START: "2026-06-27 00:00:00"
       run: |
+        # Git config is needed by the Python script to push state.json
         git config --global user.name 'SMC Bot'
         git config --global user.email 'smc-bot@users.noreply.github.com'
-        
-        # Background job to commit state.json periodically if changed
-        while true; do
-          sleep 120
-          git add state.json || true
-          git diff --quiet && git diff --staged --quiet || (git commit -m "Update paper trading state" && git pull --rebase && git push)
-        done &
         
         python smc_live_bot.py --continuous
