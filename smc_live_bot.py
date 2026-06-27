@@ -499,9 +499,9 @@ def run_portfolio():
                         'sl_moved_to_be': state['sl_moved_to_be'],
                         'lock_swing_high': state['lock_swing_high'],
                         'lock_swing_low': state['lock_swing_low']
-                    }
-                    send_telegram(f"🔄 **{symbol}**: Adopted active {direction} position from history.")
-                    any_action = True
+                        }
+                        send_telegram(f"🔄 **{symbol}**: Adopted active {direction} position from history.")
+                        any_action = True
             
         except Exception as e:
             error_str = str(e)
