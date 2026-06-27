@@ -22,8 +22,16 @@ def send_telegram(message):
             print("Telegram Error:", e)
 
 def fetch_data(symbol, timeframe, limit=1000):
-    exchange = ccxt.binance()
-    ohlcv = exchange.fetch_ohlcv(symbol, timeframe, limit=limit)
+    exchange = ccxt.lbank({
+        'apiKey': '9b10e6dd-5ace-41e2-a3b8-d8681aea7cc3',
+        'secret': '',  # Not needed for public OHLCV, but ccxt likes it empty instead of missing sometimes
+        'enableRateLimit': True,
+    })
+    
+    # LBank requires slash format for pairs (e.g., 'BTC/USDT')
+    ccxt_symbol = symbol.replace('USDT', '/USDT')
+    
+    ohlcv = exchange.fetch_ohlcv(ccxt_symbol, timeframe, limit=limit)
     df = pd.DataFrame(ohlcv, columns=['timestamp', 'open', 'high', 'low', 'close', 'volume'])
     df['timestamp'] = pd.to_datetime(df['timestamp'], unit='ms')
     df.set_index('timestamp', inplace=True)
