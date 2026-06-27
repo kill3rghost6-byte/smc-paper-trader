@@ -26,6 +26,7 @@ def fetch_data(symbol, timeframe, limit=1000):
         'apiKey': '9b10e6dd-5ace-41e2-a3b8-d8681aea7cc3',
         'secret': '',  # Not needed for public OHLCV, but ccxt likes it empty instead of missing sometimes
         'enableRateLimit': True,
+        'timeout': 10000, # 10 seconds timeout to prevent infinite hanging
     })
     
     # LBank requires slash format for pairs (e.g., 'BTC/USDT')
