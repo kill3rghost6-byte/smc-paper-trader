@@ -346,31 +346,27 @@ def run_portfolio():
         try:
             tf = info['tf']
             
-            # Timeframe alignment check
-            if tf == '30m' and last_15m_mark % 30 != 0:
-                print(f"Skipping {symbol} ({tf}) as it does not align with the current 30m candle.")
-                continue
-            if tf == '1h' and last_15m_mark % 60 != 0:
-                print(f"Skipping {symbol} ({tf}) as it does not align with the current 1h candle.")
-                continue
+            # Timeframe alignment check removed: all symbols are scanned continuously for live SL/TP hits
                 
             risk = info['risk']
-            df = fetch_data(symbol, tf)
-            tick = df['close'].diff().abs().replace(0, np.nan).min()
+            df_full = fetch_data(symbol, tf)
+            tick = df_full['close'].diff().abs().replace(0, np.nan).min()
             if pd.isna(tick): tick = 0.0001
             
-            df = compute_indicators(df)
-            state = get_live_state(df, tick, symbol)
+            live_candle = df_full.iloc[-1]
+            h = float(live_candle['high'])
+            l = float(live_candle['low'])
+            c = float(live_candle['close'])
+            
+            df_closed = compute_indicators(df_full.copy())
+            state = get_live_state(df_closed, tick, symbol)
             
             # STATEFUL EXECUTION ENGINE
             if 'live_positions' not in state_data: state_data['live_positions'] = {}
             if 'live_orders' not in state_data: state_data['live_orders'] = {}
             
-            last_candle = df.iloc[-1]
-            h = float(last_candle['high'])
-            l = float(last_candle['low'])
-            c = float(last_candle['close'])
-            ts = str(last_candle.name)
+            last_closed = df_closed.iloc[-1]
+            ts = str(last_closed.name)
             
             # 1. Handle Active Positions
             if symbol in state_data['live_positions']:
