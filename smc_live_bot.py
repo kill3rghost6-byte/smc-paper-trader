@@ -419,6 +419,9 @@ def run_portfolio():
                     msg = f"🚨 **PAPER TRADE CLOSED: {symbol}** 🚨\nDirection: {pos['direction']}\nResult: {res_emoji}\nR-Multiple: {r_multiple:.2f}R\nPnL: ${trade_pnl:.2f}\nNew Balance: ${state_data['balance']:.2f}"
                     send_telegram(msg)
                     
+                    if 'cooldown' not in state_data: state_data['cooldown'] = {}
+                    state_data['cooldown'][symbol] = True
+                    
                     del state_data['live_positions'][symbol]
                 
                 any_action = True
@@ -455,30 +458,37 @@ def run_portfolio():
                         
             # 3. Handle NEW Signals from get_live_state
             else:
-                if state['limit_type'] != 0 and state['position'] == 0:
-                    direction = 'LONG' if state['limit_type'] == 1 else 'SHORT'
-                    
-                    state_data['live_orders'][symbol] = {
-                        'direction': direction,
-                        'entry': state['entry_price'],
-                        'initial_sl': state['sl'],
-                        'sl': state['sl'],
-                        'tp1': state['tp1'],
-                        'tp2': state['tp2'],
-                        'tp1_done': False,
-                        'sl_moved_to_be': False,
-                        'lock_swing_high': state['lock_swing_high'],
-                        'lock_swing_low': state['lock_swing_low']
-                    }
-                    msg = f"🔍 **{symbol} ({tf})** - Time: {ts} UTC\n⚠️ **LIMIT ORDER ACTIVE** ⚠️\nDirection: {direction}\nEntry: {state['entry_price']:.5f}\nSL: {state['sl']:.5f}\nTP2: {state['tp2']:.5f}"
-                    send_telegram(msg)
-                    any_action = True
-                    
-                elif state['position'] != 0:
-                    # Adopt existing backtest position
-                    direction = 'LONG' if state['position'] == 1 else 'SHORT'
-                    entry_adj = state['entry_price'] + (tick * 2) if direction == 'LONG' else state['entry_price'] - (tick * 2)
-                    state_data['live_positions'][symbol] = {
+                if state['position'] == 0 and state['limit_type'] == 0:
+                    if 'cooldown' in state_data and symbol in state_data['cooldown']:
+                        del state_data['cooldown'][symbol]
+                        
+                if 'cooldown' in state_data and state_data['cooldown'].get(symbol, False):
+                    pass # Waiting for backtester to catch up and clear the old position
+                else:
+                    if state['limit_type'] != 0 and state['position'] == 0:
+                        direction = 'LONG' if state['limit_type'] == 1 else 'SHORT'
+                        
+                        state_data['live_orders'][symbol] = {
+                            'direction': direction,
+                            'entry': state['entry_price'],
+                            'initial_sl': state['sl'],
+                            'sl': state['sl'],
+                            'tp1': state['tp1'],
+                            'tp2': state['tp2'],
+                            'tp1_done': False,
+                            'sl_moved_to_be': False,
+                            'lock_swing_high': state['lock_swing_high'],
+                            'lock_swing_low': state['lock_swing_low']
+                        }
+                        msg = f"🔍 **{symbol} ({tf})** - Time: {ts} UTC\n⚠️ **LIMIT ORDER ACTIVE** ⚠️\nDirection: {direction}\nEntry: {state['entry_price']:.5f}\nSL: {state['sl']:.5f}\nTP2: {state['tp2']:.5f}"
+                        send_telegram(msg)
+                        any_action = True
+                        
+                    elif state['position'] != 0:
+                        # Adopt existing backtest position
+                        direction = 'LONG' if state['position'] == 1 else 'SHORT'
+                        entry_adj = state['entry_price'] + (tick * 2) if direction == 'LONG' else state['entry_price'] - (tick * 2)
+                        state_data['live_positions'][symbol] = {
                         'direction': direction,
                         'entry': entry_adj, 
                         'initial_sl': state['sl'], 
