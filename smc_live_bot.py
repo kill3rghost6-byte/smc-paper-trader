@@ -276,9 +276,9 @@ def get_live_state(df, tick_size, symbol):
 
 def run_portfolio():
     portfolio = {
-        'ETHUSDT': 0.015,
-        'DOGEUSDT': 0.0181,
-        'XRPUSDT': 0.0238
+        'BTCUSDT': {'tf': '30m', 'risk': 0.0279},
+        'DOGEUSDT': {'tf': '15m', 'risk': 0.0230},
+        'XRPUSDT': {'tf': '15m', 'risk': 0.0238}
     }
     
     state_file = 'state.json'
@@ -295,9 +295,11 @@ def run_portfolio():
     
     send_telegram("🔥 **SMC Aggressive Bot (Paper Trading) Started** 🔥")
     
-    for symbol, risk in portfolio.items():
+    for symbol, info in portfolio.items():
         try:
-            df = fetch_data(symbol, '15m')
+            tf = info['tf']
+            risk = info['risk']
+            df = fetch_data(symbol, tf)
             tick = df['close'].diff().abs().replace(0, np.nan).min()
             if pd.isna(tick): tick = 0.0001
             
@@ -308,7 +310,6 @@ def run_portfolio():
             for trade in state['completed_trades']:
                 exit_time = pd.to_datetime(trade['exit_time'])
                 if exit_time >= PAPER_TRADE_START and trade['id'] not in state_data['history_ids']:
-                    # Trade happened during our paper trading window and is new
                     trade_pnl = state_data['balance'] * risk * trade['r_multiple']
                     state_data['balance'] += trade_pnl
                     state_data['history_ids'].append(trade['id'])
@@ -320,7 +321,7 @@ def run_portfolio():
                     msg_trade += f"New Balance: ${state_data['balance']:.2f}"
                     send_telegram(msg_trade)
             
-            msg = f"🔍 **{symbol} (15m)** - Time: {state['timestamp']} UTC\n"
+            msg = f"🔍 **{symbol} ({tf})** - Time: {state['timestamp']} UTC\n"
             if state['position'] != 0:
                 direction = "LONG 🟢" if state['position'] == 1 else "SHORT 🔴"
                 msg += f"Currently IN POSITION: {direction}\n"
