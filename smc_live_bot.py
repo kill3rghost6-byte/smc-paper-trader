@@ -17,7 +17,11 @@ def send_telegram(message):
     if TELEGRAM_BOT_TOKEN and TELEGRAM_CHAT_ID:
         url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendMessage"
         try:
-            requests.post(url, json={"chat_id": TELEGRAM_CHAT_ID, "text": message})
+            # Truncate message to avoid Telegram's 4096 char limit if there's a huge HTML error
+            if len(message) > 4000:
+                message = message[:4000] + "... (truncated)"
+            response = requests.post(url, json={"chat_id": TELEGRAM_CHAT_ID, "text": message}, timeout=10)
+            response.raise_for_status()
         except Exception as e:
             print("Telegram Error:", e)
 
@@ -354,7 +358,10 @@ def run_portfolio():
                 any_action = True
             
         except Exception as e:
-            send_telegram(f"❌ Error processing {symbol}: {str(e)}")
+            error_str = str(e)
+            if len(error_str) > 150:
+                error_str = error_str[:150] + "... (truncated)"
+            send_telegram(f"❌ Error processing {symbol}: {error_str}")
             any_action = True
             
     # Save State
