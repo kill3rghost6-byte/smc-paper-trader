@@ -2,8 +2,8 @@ name: SMC Aggressive Portfolio Live Bot
 
 on:
   schedule:
-    # Runs 1 minute after every 15m candle closes (1, 16, 31, 46)
-    - cron: '1,16,31,46 * * * *'
+    # Runs every 5 hours to spawn a continuous 5.5 hour worker
+    - cron: '0 */5 * * *'
   workflow_dispatch:
 
 jobs:
@@ -26,17 +26,20 @@ jobs:
         python -m pip install --upgrade pip
         pip install pandas numpy ta ccxt requests
         
-    - name: Run Live Bot
+    - name: Run Live Bot in Continuous Mode
       env:
         TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
         TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
         PAPER_TRADE_START: "2026-06-27 00:00:00"
-      run: python smc_live_bot.py
-      
-    - name: Commit state.json
       run: |
         git config --global user.name 'SMC Bot'
         git config --global user.email 'smc-bot@users.noreply.github.com'
-        git add state.json
-        # Only commit if there are changes
-        git diff --quiet && git diff --staged --quiet || (git commit -m "Update paper trading state" && git push)
+        
+        # Background job to commit state.json periodically if changed
+        while true; do
+          sleep 120
+          git add state.json || true
+          git diff --quiet && git diff --staged --quiet || (git commit -m "Update paper trading state" && git pull --rebase && git push)
+        done &
+        
+        python smc_live_bot.py --continuous

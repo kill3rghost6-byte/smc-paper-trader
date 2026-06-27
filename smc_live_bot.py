@@ -367,5 +367,31 @@ def run_portfolio():
         # User requested to see everything it does, so we send a single summary message per run instead of absolute silence.
         send_telegram(f"✅ **SMC Scan Complete** | Balance: ${state_data['balance']:.2f}\nNo active setups or positions right now.")
 
+def run_continuous():
+    send_telegram("🚀 **SMC Bot switched to Continuous Mode (100% Precision)** 🚀\nIt will now run flawlessly without GitHub cron delays.")
+    start_time = time.time()
+    max_duration = 5.5 * 3600 # 5.5 hours max per GitHub Action run
+    
+    while time.time() - start_time < max_duration:
+        try:
+            run_portfolio()
+        except Exception as e:
+            print("Error in run_portfolio:", e)
+            
+        now = datetime.datetime.utcnow()
+        # Calculate next 15-minute mark + 1 minute (e.g. 01, 16, 31, 46)
+        minute = (now.minute // 15 + 1) * 15
+        next_run = now.replace(minute=0, second=0, microsecond=0) + datetime.timedelta(minutes=minute)
+        next_run = next_run + datetime.timedelta(minutes=1)
+        
+        sleep_seconds = (next_run - now).total_seconds()
+        print(f"Sleeping for {sleep_seconds} seconds until {next_run} UTC...")
+        time.sleep(sleep_seconds)
+
 if __name__ == '__main__':
-    run_portfolio()
+    import sys
+    import time
+    if len(sys.argv) > 1 and sys.argv[1] == '--continuous':
+        run_continuous()
+    else:
+        run_portfolio()
