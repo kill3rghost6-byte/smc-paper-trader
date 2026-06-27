@@ -364,7 +364,11 @@ def run_portfolio():
             trade_closed_this_run = False
             for trade in state['completed_trades']:
                 exit_time = pd.to_datetime(trade['exit_time'])
-                if exit_time >= PAPER_TRADE_START and trade['id'] not in state_data['history_ids']:
+                
+                # Prevent historical ghost trades: only process trades that closed within the last 6 hours
+                is_recent = (now - exit_time) <= datetime.timedelta(hours=6)
+                
+                if exit_time >= PAPER_TRADE_START and is_recent and trade['id'] not in state_data['history_ids']:
                     trade_pnl = state_data['balance'] * risk * trade['r_multiple']
                     state_data['balance'] += trade_pnl
                     state_data['history_ids'].append(trade['id'])
