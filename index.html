@@ -1,0 +1,1735 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SMC Quant | پلتفرم مدیریت سرمایه هوشمند</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-dark: #050505;
+            --bg-surface: #111111;
+            --bg-card: rgba(24, 24, 27, 0.85);
+            --primary: #00ffcc;
+            --primary-glow: rgba(0, 255, 204, 0.4);
+            --secondary: #7000ff;
+            --text-main: #ffffff;
+            --text-muted: #888888;
+            --border: #222222;
+            --danger: #ef4444;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Vazirmatn', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            overflow-x: hidden;
+        }
+
+        /* --- Animated Background for Dashboard --- */
+        .bg-animation {
+            position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            z-index: -1;
+            background: radial-gradient(circle at 15% 50%, rgba(0, 255, 204, 0.05), transparent 25%),
+                        radial-gradient(circle at 85% 30%, rgba(112, 0, 255, 0.05), transparent 25%);
+            animation: pulseBg 10s infinite alternate;
+            display: none;
+        }
+
+        @keyframes pulseBg {
+            0% { transform: scale(1); }
+            100% { transform: scale(1.1); }
+        }
+
+        /* --- Navigation --- */
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.5rem 4rem;
+            border-bottom: 1px solid var(--border);
+            background: rgba(5, 5, 5, 0.8);
+            backdrop-filter: blur(10px);
+            position: fixed;
+            top: 0;
+            width: 100%;
+            z-index: 100;
+        }
+
+        .logo {
+            font-size: 1.8rem;
+            font-weight: 800;
+            background: linear-gradient(90deg, var(--primary), #00b3ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .nav-links button {
+            background: transparent;
+            color: var(--text-main);
+            border: none;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            margin-right: 2rem;
+            transition: 0.3s;
+        }
+
+        .nav-links button:hover {
+            color: var(--primary);
+        }
+
+        .login-btn {
+            background: var(--primary);
+            color: #000 !important;
+            padding: 0.6rem 1.5rem;
+            border-radius: 30px;
+            box-shadow: 0 0 15px var(--primary-glow);
+        }
+
+        /* --- Landing Page --- */
+        .landing {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 0 2rem;
+            position: relative;
+        }
+
+        .bg-glow {
+            position: absolute;
+            width: 600px;
+            height: 600px;
+            background: radial-gradient(circle, var(--primary-glow) 0%, transparent 60%);
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: -1;
+            filter: blur(50px);
+            opacity: 0.5;
+        }
+
+        .landing h1 {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            line-height: 1.2;
+        }
+
+        .landing p {
+            font-size: 1.2rem;
+            color: var(--text-muted);
+            max-width: 600px;
+            margin-bottom: 2.5rem;
+        }
+
+        .cta-btn {
+            background: linear-gradient(90deg, var(--primary), #00b3ff);
+            color: #000;
+            border: none;
+            padding: 1rem 3rem;
+            font-size: 1.2rem;
+            font-weight: 800;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 10px 30px var(--primary-glow);
+            transition: 0.3s;
+        }
+
+        .cta-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 40px var(--primary-glow);
+        }
+
+        /* --- Auth Modal --- */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.8);
+            backdrop-filter: blur(5px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 200;
+            opacity: 0;
+            pointer-events: none;
+            transition: 0.3s;
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        .auth-box {
+            background: var(--bg-surface);
+            padding: 3rem;
+            border-radius: 20px;
+            border: 1px solid var(--border);
+            width: 400px;
+            text-align: center;
+            transform: translateY(50px);
+            transition: 0.3s;
+        }
+
+        .modal-overlay.active .auth-box {
+            transform: translateY(0);
+        }
+
+        .auth-box input {
+            width: 100%;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            background: var(--bg-dark);
+            border: 1px solid var(--border);
+            color: white;
+            border-radius: 10px;
+            font-family: inherit;
+        }
+
+        .auth-box input:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        /* --- Dashboard Container --- */
+        .dashboard-container {
+            display: none;
+            padding-top: 100px;
+            min-height: 100vh;
+        }
+
+        .dash-layout {
+            display: flex;
+            max-width: 1400px;
+            margin: 0 auto;
+            gap: 2rem;
+            padding: 0 2rem;
+        }
+
+        /* Sidebar Tabs */
+        .sidebar {
+            width: 300px;
+            padding: 2rem;
+            background: var(--bg-surface);
+            border-radius: 20px;
+            border: 1px solid var(--border);
+            height: fit-content;
+            position: sticky;
+            top: 120px;
+        }
+
+        .sidebar button {
+            width: 100%;
+            background: transparent;
+            color: var(--text-muted);
+            border: 1px solid var(--border);
+            padding: 1rem;
+            margin-bottom: 1rem;
+            border-radius: 12px;
+            cursor: pointer;
+            text-align: right;
+            font-weight: 600;
+            transition: 0.3s;
+            font-size: 1rem;
+        }
+
+        .sidebar button:hover {
+            background: rgba(255,255,255,0.05);
+            transform: translateX(-5px);
+        }
+
+        .sidebar button.active {
+            background: rgba(0, 255, 204, 0.1);
+            color: var(--primary);
+            border-color: var(--primary);
+            box-shadow: 0 0 15px var(--primary-glow);
+        }
+
+        /* Main Content */
+        .main-dash {
+            flex: 1;
+            padding-bottom: 4rem;
+        }
+
+        .dash-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .dash-header h2 {
+            font-size: 2rem;
+            color: var(--primary);
+        }
+
+        .gif-container {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 1.5rem;
+            margin-top: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .gif-container img {
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0, 255, 204, 0.1);
+            height: 100px;
+            object-fit: cover;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: var(--bg-surface);
+            padding: 2rem;
+            border-radius: 16px;
+            border: 1px solid var(--border);
+            text-align: center;
+            transition: 0.3s;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--primary);
+        }
+
+        .stat-value {
+            font-size: 2.2rem;
+            font-weight: 800;
+            color: var(--text-main);
+            margin: 0.5rem 0;
+        }
+
+        .stat-value.green { color: var(--primary); text-shadow: 0 0 10px var(--primary-glow); }
+        .stat-value.red { color: var(--danger); }
+
+        .charts {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 1.5rem;
+            margin-bottom: 3rem;
+        }
+
+        .chart-box {
+            background: var(--bg-surface);
+            padding: 1.5rem;
+            border-radius: 16px;
+            border: 1px solid var(--border);
+        }
+
+        .logs-section {
+            background: var(--bg-surface);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 2rem;
+            margin-bottom: 3rem;
+        }
+
+        .logs-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 1rem;
+        }
+
+        .logs-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .log-card {
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid var(--border);
+            border-radius: 15px;
+            padding: 1.5rem;
+            transition: 0.3s;
+        }
+        
+        .log-card:hover {
+            background: rgba(255, 255, 255, 0.05);
+            transform: scale(1.02);
+            border-color: rgba(255,255,255,0.2);
+        }
+
+        .log-card.positive { border-left: 4px solid var(--primary); }
+        .log-card.negative { border-left: 4px solid var(--danger); }
+
+        .month-title {
+            font-size: 1.2rem;
+            font-weight: 800;
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .coin-breakdown {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            font-size: 0.9rem;
+            color: var(--text-muted);
+        }
+
+        .coin-row {
+            display: flex;
+            justify-content: space-between;
+            background: rgba(255,255,255,0.02);
+            padding: 0.3rem 0.5rem;
+            border-radius: 5px;
+        }
+
+        .coin-row span.win { color: var(--primary); font-weight: bold; }
+        .coin-row span.loss { color: var(--danger); font-weight: bold; }
+
+        /* Memes Section */
+        .memes-section {
+            text-align: center;
+            margin-top: 4rem;
+            padding-top: 2rem;
+            border-top: 1px solid var(--border);
+        }
+        
+        .memes-section h2 {
+            margin-bottom: 2rem;
+            color: var(--text-muted);
+        }
+
+        .memes-grid {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .meme-card {
+            background: #111;
+            padding: 1rem;
+            border-radius: 15px;
+            border: 1px solid var(--border);
+        }
+
+        .meme-card img {
+            border-radius: 10px;
+            width: 250px;
+            height: 250px;
+            object-fit: cover;
+        }
+        
+        .meme-card p {
+            margin-top: 1rem;
+            font-weight: bold;
+            color: var(--primary);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="bg-animation" id="bg-anim"></div>
+
+    <!-- Navigation -->
+    <nav>
+        <div class="logo">SMC Quant</div>
+        <div class="nav-links">
+            <button onclick="showLanding()">صفحه اصلی</button>
+            <button onclick="openModal()">ورود اعضا</button>
+            <button class="login-btn" onclick="openModal()">ثبت نام رایگان</button>
+        </div>
+    </nav>
+
+    <!-- Landing Page -->
+    <div class="landing" id="landing-page">
+        <div class="bg-glow"></div>
+        <h1 id="hero-title">پلتفرم مدیریت سرمایه و بک‌تست هوشمند</h1>
+        <p>شبیه‌سازی مونت‌کارلو برای پیدا کردن امن‌ترین و پرسودترین سبد الگوریتمی شما در بازار کریپتو. ریسک را کاهش دهید، سود را تضمین کنید.</p>
+        <button class="cta-btn" onclick="openModal()">ورود به داشبورد تخصصی</button>
+    </div>
+
+    <!-- Login Modal -->
+    <div class="modal-overlay" id="auth-modal">
+        <div class="auth-box">
+            <h2 style="margin-bottom: 1.5rem;">ورود به حساب کاربری</h2>
+            <input type="text" placeholder="نام کاربری (demo)" id="username">
+            <input type="password" placeholder="رمز عبور (1234)" id="password">
+            <button class="cta-btn" style="width: 100%; padding: 0.8rem; font-size: 1rem;" onclick="login()">ورود</button>
+            <p style="margin-top: 1rem; font-size: 0.8rem; color: var(--text-muted); cursor: pointer;" onclick="closeModal()">انصراف</p>
+        </div>
+    </div>
+
+    <!-- Dashboard Interface -->
+    <div class="dashboard-container" id="dashboard-page">
+        
+        <div class="dash-layout">
+            <div class="sidebar" id="sidebar-tabs">
+                <h3 style="margin-bottom: 2rem; color: var(--text-muted); text-align: center;">پورتفولیوهای بهینه شده</h3>
+                <!-- Generated via JS -->
+            </div>
+            
+            <div class="main-dash">
+                <div class="dash-header">
+                    <h2 id="dash-title">اعتبارسنجی بک‌تست لایو ۳۶۵ روزه 💯</h2>
+                    <p id="dash-subtitle" style="color: var(--text-muted); margin-top: 0.5rem; font-size: 1.2rem;">انتخاب پورتفولیو...</p>
+                    
+                    <div class="gif-container">
+                        <img src="https://media.giphy.com/media/xTiTnqUxyWbsAXq7Ju/giphy.gif" alt="Money Raining">
+                        <img src="https://media.giphy.com/media/trN9ht5RlE3Dcwavg2/giphy.gif" alt="Stonks">
+                        <img src="https://media.giphy.com/media/Y2ZUWLrTy63j9T6qrK/giphy.gif" alt="Rocket">
+                    </div>
+                </div>
+
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div style="color: var(--text-muted);">سرمایه اولیه 💵</div>
+                        <div class="stat-value">$10,000</div>
+                    </div>
+                    <div class="stat-card">
+                        <div style="color: var(--text-muted);">سرمایه نهایی 💰</div>
+                        <div class="stat-value green" id="stat-final">$--</div>
+                    </div>
+                    <div class="stat-card">
+                        <div style="color: var(--text-muted);">رشد یک‌ساله 🚀</div>
+                        <div class="stat-value green" id="stat-return">--%</div>
+                    </div>
+                    <div class="stat-card" style="grid-column: span 3; text-align: center; padding: 1rem;">
+                        <span style="color: var(--text-muted);">حداکثر افت (MDD): <b id="stat-mdd" class="red">--%</b> 📉</span>
+                    </div>
+                </div>
+
+                <div class="charts">
+                    <div class="chart-box">
+                        <h4 style="text-align: center; margin-bottom: 1rem;">شبیه‌سازی رشد سرمایه (فرضی)</h4>
+                        <canvas id="lineChart" height="150"></canvas>
+                    </div>
+                    <div class="chart-box">
+                        <h4 style="text-align: center; margin-bottom: 1rem;">تخصیص سرمایه (ریسک)</h4>
+                        <div style="height: 250px; display:flex; justify-content:center;">
+                            <canvas id="pieChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="logs-section">
+                    <div class="logs-header">
+                        <h3 style="margin:0;">گزارش ماه به ماه 📅</h3>
+                        <span id="win-months" style="background: rgba(0,255,204,0.1); color: var(--primary); padding: 0.5rem 1rem; border-radius: 10px;">--</span>
+                    </div>
+                    
+                    <div class="logs-grid" id="logsGrid">
+                        <!-- Injected via JS -->
+                    </div>
+                </div>
+
+                <div class="memes-section">
+                    <h2>وقتی الگوریتم داره برات پول در میاره 😂👇</h2>
+                    <div class="memes-grid">
+                        <div class="meme-card">
+                            <img src="https://media.giphy.com/media/VTxmwaCEwSlZm/giphy.gif" alt="Dump it">
+                            <p>He bought? Dump it. 📉</p>
+                        </div>
+                        <div class="meme-card">
+                            <img src="https://media.giphy.com/media/7FBY7h5Psqd20/giphy.gif" alt="Rollercoaster">
+                            <p>Bitcoin Rollercoaster 🎢</p>
+                        </div>
+                        <div class="meme-card">
+                            <img src="https://media.giphy.com/media/3o6gDWzmAzrpi5DQU8/giphy.gif" alt="HODL">
+                            <p>Just HODL & Chill ☕</p>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Data populated from validation
+        const portfolios = [
+    {
+        "name": "\u067e\u0648\u0631\u062a\u0641\u0648\u0644\u06cc\u0648 \u06f1 (\u0627\u0645\u0646) \ud83c\udfc6",
+        "weights": {
+            "BTCUSDT_30m": 0.0281,
+            "TRXUSDT_30m": 0.023,
+            "DOGEUSDT_15m": 0.0181
+        },
+        "return": 185.69086040782204,
+        "mdd": 17.518564456990752,
+        "monthly_avg": 15.474238367318504,
+        "eq_curve": [
+            10000,
+            10497.84919112425,
+            10118.336624344498,
+            10709.66823833625,
+            10547.665197870609,
+            10340.384770753522,
+            12246.817714470364,
+            13796.68200112231,
+            14626.557981464997,
+            14059.013835741855,
+            13718.659201525048,
+            14256.60421714303,
+            13540.000364289845,
+            14732.109849100067,
+            16211.984182965894,
+            15476.272984358298,
+            14280.648665251996,
+            13945.38020777272,
+            15915.517660507805,
+            14825.087266666087,
+            14855.016525231395,
+            14854.558196424332,
+            14503.500371753364,
+            14626.95359105997,
+            15596.227899132306,
+            13964.661430670256,
+            15284.528085669534,
+            16096.23080561278,
+            16000.252536693024,
+            15799.050592088452,
+            18497.092402797956,
+            19841.339213454743,
+            20520.274282230177,
+            17508.519609008912,
+            20163.481303136203,
+            20099.95749146802,
+            20132.889116458962,
+            22482.77132760934,
+            21391.01766378848,
+            22913.066534769674,
+            22767.101456200322,
+            23667.11441022894,
+            24681.258411216815,
+            22590.62750420016,
+            21794.833103445817,
+            21986.883072472632,
+            20977.14650521964,
+            23166.54443163146,
+            21245.698446532286,
+            26873.780656948802,
+            29569.132833660038,
+            31352.12683480705,
+            30987.89929713125
+        ],
+        "logs": [
+            {
+                "month": "2025-06",
+                "profit": 407.1688976647736,
+                "trades": 4,
+                "coins": {
+                    "BTCUSDT_30m": 185.87398482326785,
+                    "TRXUSDT_30m": 0.0,
+                    "DOGEUSDT_15m": 221.29491284150578
+                }
+            },
+            {
+                "month": "2025-07",
+                "profit": -66.78412691125382,
+                "trades": 31,
+                "coins": {
+                    "BTCUSDT_30m": 474.88516204735356,
+                    "TRXUSDT_30m": -648.8346969691954,
+                    "DOGEUSDT_15m": 107.16540801058775
+                }
+            },
+            {
+                "month": "2025-08",
+                "profit": 4275.499793106284,
+                "trades": 32,
+                "coins": {
+                    "BTCUSDT_30m": 4186.391293162233,
+                    "TRXUSDT_30m": 215.5614267775673,
+                    "DOGEUSDT_15m": -126.45292683351516
+                }
+            },
+            {
+                "month": "2025-09",
+                "profit": 116.22528524025921,
+                "trades": 24,
+                "coins": {
+                    "BTCUSDT_30m": 546.142545052684,
+                    "TRXUSDT_30m": -249.55128675175416,
+                    "DOGEUSDT_15m": -180.3659730606704
+                }
+            },
+            {
+                "month": "2025-10",
+                "profit": 336.0455653785159,
+                "trades": 32,
+                "coins": {
+                    "BTCUSDT_30m": 2041.356764565898,
+                    "TRXUSDT_30m": -739.9255547818611,
+                    "DOGEUSDT_15m": -965.3856444055209
+                }
+            },
+            {
+                "month": "2025-11",
+                "profit": -713.1179567764713,
+                "trades": 23,
+                "coins": {
+                    "BTCUSDT_30m": -1051.5796164032731,
+                    "TRXUSDT_30m": -422.76882781071265,
+                    "DOGEUSDT_15m": 761.2304874375146
+                }
+            },
+            {
+                "month": "2025-12",
+                "profit": 117.75195314399622,
+                "trades": 30,
+                "coins": {
+                    "BTCUSDT_30m": -1437.642909478258,
+                    "TRXUSDT_30m": -353.86523590160937,
+                    "DOGEUSDT_15m": 1909.2600985238635
+                }
+            },
+            {
+                "month": "2026-01",
+                "profit": 992.6044167429798,
+                "trades": 28,
+                "coins": {
+                    "BTCUSDT_30m": 1630.3139172625342,
+                    "TRXUSDT_30m": 55.98690023789527,
+                    "DOGEUSDT_15m": -693.6964007574496
+                }
+            },
+            {
+                "month": "2026-02",
+                "profit": 4647.495057467576,
+                "trades": 32,
+                "coins": {
+                    "BTCUSDT_30m": 1667.834169390395,
+                    "TRXUSDT_30m": 360.0226660109148,
+                    "DOGEUSDT_15m": 2619.6382220662667
+                }
+            },
+            {
+                "month": "2026-03",
+                "profit": 870.8866348241615,
+                "trades": 35,
+                "coins": {
+                    "BTCUSDT_30m": 1149.104369048567,
+                    "TRXUSDT_30m": 188.702811828653,
+                    "DOGEUSDT_15m": -466.9205460530583
+                }
+            },
+            {
+                "month": "2026-04",
+                "profit": 344.6619518761644,
+                "trades": 34,
+                "coins": {
+                    "BTCUSDT_30m": -1179.8539118694157,
+                    "TRXUSDT_30m": 279.4428396426183,
+                    "DOGEUSDT_15m": 1245.073024102962
+                }
+            },
+            {
+                "month": "2026-05",
+                "profit": -82.7390252247111,
+                "trades": 31,
+                "coins": {
+                    "BTCUSDT_30m": -3740.8199252417744,
+                    "TRXUSDT_30m": 4832.237181269829,
+                    "DOGEUSDT_15m": -1174.1562812527668
+                }
+            },
+            {
+                "month": "2026-06",
+                "profit": 7323.387594249911,
+                "trades": 33,
+                "coins": {
+                    "BTCUSDT_30m": 3857.8523001514063,
+                    "TRXUSDT_30m": 1947.3659369947363,
+                    "DOGEUSDT_15m": 1518.169357103768
+                }
+            }
+        ]
+    },
+    {
+        "name": "\u067e\u0648\u0631\u062a\u0641\u0648\u0644\u06cc\u0648 \u06f2 (\u0647\u062c\u0648\u0645\u06cc) \ud83d\ude80",
+        "weights": {
+            "BTCUSDT_30m": 0.0279,
+            "DOGEUSDT_15m": 0.023,
+            "TRXUSDT_30m": 0.0195
+        },
+        "return": 193.03094527098105,
+        "mdd": 18.93826417101486,
+        "monthly_avg": 16.08591210591509,
+        "eq_curve": [
+            10000,
+            10588.65188833496,
+            10057.27177632964,
+            10702.985314123116,
+            10722.127342364125,
+            10501.665043809897,
+            12490.549071437912,
+            13905.988244409082,
+            14661.519026779748,
+            14259.897532968818,
+            13878.690010850614,
+            14564.014942288442,
+            13776.148527555884,
+            14826.796330222953,
+            16294.787240714903,
+            15279.004201439575,
+            14028.837825938841,
+            13852.996210524192,
+            15999.668293445955,
+            15034.857713195857,
+            15124.835584138009,
+            15197.759284017766,
+            14921.495465727772,
+            15353.749059734695,
+            16333.5154185217,
+            14584.052736410196,
+            16023.417342081328,
+            17091.702688602065,
+            16849.380618919848,
+            16522.045770098448,
+            19206.761905331936,
+            20687.551200571892,
+            22068.022561805494,
+            18343.99716358027,
+            21589.306461423203,
+            21234.51131035166,
+            21742.517047988986,
+            23781.086789144014,
+            22860.41965250718,
+            24296.24711993188,
+            24390.316664654532,
+            25889.79132794692,
+            26694.254873030317,
+            24311.960936337087,
+            23052.666954053442,
+            22921.311641004115,
+            21691.892338166064,
+            23989.352511081714,
+            21759.588199132384,
+            27818.011454233118,
+            30256.635277023754,
+            31984.37032759309,
+            31855.15285036781
+        ],
+        "logs": [
+            {
+                "month": "2025-06",
+                "profit": 464.4601605306246,
+                "trades": 4,
+                "coins": {
+                    "BTCUSDT_30m": 185.59058024370682,
+                    "DOGEUSDT_15m": 278.86958028691777,
+                    "TRXUSDT_30m": 0.0
+                }
+            },
+            {
+                "month": "2025-07",
+                "profit": 37.204883279271996,
+                "trades": 31,
+                "coins": {
+                    "BTCUSDT_30m": 471.2649252503208,
+                    "DOGEUSDT_15m": 120.22844208374022,
+                    "TRXUSDT_30m": -554.2884840547888
+                }
+            },
+            {
+                "month": "2025-08",
+                "profit": 4229.9918008866525,
+                "trades": 32,
+                "coins": {
+                    "BTCUSDT_30m": 4211.0058875567,
+                    "DOGEUSDT_15m": -172.05616681005006,
+                    "TRXUSDT_30m": 191.0420801400013
+                }
+            },
+            {
+                "month": "2025-09",
+                "profit": 95.13948552640656,
+                "trades": 24,
+                "coins": {
+                    "BTCUSDT_30m": 553.2436719628473,
+                    "DOGEUSDT_15m": -244.9222382664148,
+                    "TRXUSDT_30m": -213.18194817002583
+                }
+            },
+            {
+                "month": "2025-10",
+                "profit": 186.1551678415508,
+                "trades": 32,
+                "coins": {
+                    "BTCUSDT_30m": 2039.2224218572296,
+                    "DOGEUSDT_15m": -1236.315322801686,
+                    "TRXUSDT_30m": -616.7519312139924
+                }
+            },
+            {
+                "month": "2025-11",
+                "profit": -458.7489911792324,
+                "trades": 23,
+                "coins": {
+                    "BTCUSDT_30m": -1057.2223896936819,
+                    "DOGEUSDT_15m": 958.8558039448201,
+                    "TRXUSDT_30m": -360.38240543037034
+                }
+            },
+            {
+                "month": "2025-12",
+                "profit": 704.1766664416656,
+                "trades": 30,
+                "coins": {
+                    "BTCUSDT_30m": -1485.1078172697705,
+                    "DOGEUSDT_15m": 2485.4068910934734,
+                    "TRXUSDT_30m": -296.1224073820371
+                }
+            },
+            {
+                "month": "2026-01",
+                "profit": 820.2805454169167,
+                "trades": 28,
+                "coins": {
+                    "BTCUSDT_30m": 1699.050298948523,
+                    "DOGEUSDT_15m": -941.4498288347943,
+                    "TRXUSDT_30m": 62.68007530318744
+                }
+            },
+            {
+                "month": "2026-02",
+                "profit": 5443.077617033002,
+                "trades": 32,
+                "coins": {
+                    "BTCUSDT_30m": 1654.1911055716741,
+                    "DOGEUSDT_15m": 3471.5889935195355,
+                    "TRXUSDT_30m": 317.2975179417913
+                }
+            },
+            {
+                "month": "2026-03",
+                "profit": 742.3213873076701,
+                "trades": 35,
+                "coins": {
+                    "BTCUSDT_30m": 1213.082876302431,
+                    "DOGEUSDT_15m": -656.4071948956313,
+                    "TRXUSDT_30m": 185.64570590086964
+                }
+            },
+            {
+                "month": "2026-04",
+                "profit": 614.0558059220702,
+                "trades": 34,
+                "coins": {
+                    "BTCUSDT_30m": -1285.3164450371578,
+                    "DOGEUSDT_15m": 1643.952311386241,
+                    "TRXUSDT_30m": 255.41993957298683
+                }
+            },
+            {
+                "month": "2026-05",
+                "profit": -1118.5263298742307,
+                "trades": 31,
+                "coins": {
+                    "BTCUSDT_30m": -3848.34861420002,
+                    "DOGEUSDT_15m": -1581.6325400213655,
+                    "TRXUSDT_30m": 4311.4548243471545
+                }
+            },
+            {
+                "month": "2026-06",
+                "profit": 7543.506327965726,
+                "trades": 33,
+                "coins": {
+                    "BTCUSDT_30m": 3893.293321327749,
+                    "DOGEUSDT_15m": 1939.9873941996889,
+                    "TRXUSDT_30m": 1710.2256124382873
+                }
+            }
+        ]
+    },
+    {
+        "name": "\u067e\u0648\u0631\u062a\u0641\u0648\u0644\u06cc\u0648 \u06f3 (\u067e\u0631\u0646\u0648\u0633\u0627\u0646) \ud83d\udd25",
+        "weights": {
+            "BTCUSDT_30m": 0.0259,
+            "TRXUSDT_30m": 0.0278,
+            "DOGEUSDT_15m": 0.0223
+        },
+        "return": 196.1189727873818,
+        "mdd": 20.20061048778603,
+        "monthly_avg": 16.343247732281817,
+        "eq_curve": [
+            10000,
+            10564.287889448306,
+            10122.395959343436,
+            10781.749994938793,
+            10528.513661988281,
+            10213.547768272385,
+            12084.48603821957,
+            13565.467340469431,
+            14237.194240889305,
+            13705.906232093863,
+            13361.883281368211,
+            14002.444378821518,
+            13230.05875749287,
+            14089.194719746303,
+            15445.354169407246,
+            14557.436330308685,
+            13193.368238188996,
+            12896.251434718763,
+            14780.92353179374,
+            13801.137893800926,
+            13890.6187452525,
+            13967.116467280015,
+            13564.235096611297,
+            13709.931812748711,
+            14820.312883593217,
+            13334.872954388371,
+            14877.094307104742,
+            15837.159284479003,
+            15609.151054198028,
+            15022.3454743896,
+            17262.318217069598,
+            18514.822923455446,
+            19550.5972168711,
+            16474.34009820186,
+            19573.975288333248,
+            19231.377464108256,
+            19282.603621503622,
+            21743.73818271013,
+            20712.856462332984,
+            21897.196802633494,
+            22022.92525641691,
+            23099.176804241477,
+            24285.957901897204,
+            22098.161714470054,
+            21407.351489052384,
+            21889.915790241404,
+            21150.883662852237,
+            23855.057408098557,
+            21745.39172920414,
+            27561.376366712077,
+            30483.105889636317,
+            32686.962589610506,
+            32457.376388760422
+        ],
+        "logs": [
+            {
+                "month": "2025-06",
+                "profit": 442.8562941580915,
+                "trades": 4,
+                "coins": {
+                    "BTCUSDT_30m": 172.14977300669196,
+                    "TRXUSDT_30m": 0.0,
+                    "DOGEUSDT_15m": 270.7065211513995
+                }
+            },
+            {
+                "month": "2025-07",
+                "profit": -229.30852588570642,
+                "trades": 31,
+                "coins": {
+                    "BTCUSDT_30m": 440.83037603620517,
+                    "TRXUSDT_30m": -794.4306509080011,
+                    "DOGEUSDT_15m": 124.29174898608949
+                }
+            },
+            {
+                "month": "2025-08",
+                "profit": 3898.9627881167794,
+                "trades": 32,
+                "coins": {
+                    "BTCUSDT_30m": 3800.1985830006047,
+                    "TRXUSDT_30m": 259.4842562181915,
+                    "DOGEUSDT_15m": -160.72005110201485
+                }
+            },
+            {
+                "month": "2025-09",
+                "profit": -23.315836642858756,
+                "trades": 24,
+                "coins": {
+                    "BTCUSDT_30m": 491.4580229128342,
+                    "TRXUSDT_30m": -293.35631020399813,
+                    "DOGEUSDT_15m": -221.4175493516948
+                }
+            },
+            {
+                "month": "2025-10",
+                "profit": -181.91230007268905,
+                "trades": 32,
+                "coins": {
+                    "BTCUSDT_30m": 1786.3692739034063,
+                    "TRXUSDT_30m": -831.2460962557325,
+                    "DOGEUSDT_15m": -1137.0354777203627
+                }
+            },
+            {
+                "month": "2025-11",
+                "profit": -514.3500465376492,
+                "trades": 23,
+                "coins": {
+                    "BTCUSDT_30m": -898.7242784246779,
+                    "TRXUSDT_30m": -475.33545388411744,
+                    "DOGEUSDT_15m": 859.7096857711463
+                }
+            },
+            {
+                "month": "2025-12",
+                "profit": 539.7432779721461,
+                "trades": 30,
+                "coins": {
+                    "BTCUSDT_30m": -1253.533674827359,
+                    "TRXUSDT_30m": -401.1557285911292,
+                    "DOGEUSDT_15m": 2194.4326813906346
+                }
+            },
+            {
+                "month": "2026-01",
+                "profit": 698.7992481280093,
+                "trades": 28,
+                "coins": {
+                    "BTCUSDT_30m": 1464.6165161139331,
+                    "TRXUSDT_30m": 74.73162611029272,
+                    "DOGEUSDT_15m": -840.548894096217
+                }
+            },
+            {
+                "month": "2026-02",
+                "profit": 4882.944463848392,
+                "trades": 32,
+                "coins": {
+                    "BTCUSDT_30m": 1431.2513456767408,
+                    "TRXUSDT_30m": 408.24004499114204,
+                    "DOGEUSDT_15m": 3043.453073180509
+                }
+            },
+            {
+                "month": "2026-03",
+                "profit": 674.1885926894851,
+                "trades": 35,
+                "coins": {
+                    "BTCUSDT_30m": 1045.2789253801284,
+                    "TRXUSDT_30m": 211.7846259048149,
+                    "DOGEUSDT_15m": -582.8749585954586
+                }
+            },
+            {
+                "month": "2026-04",
+                "profit": 684.3675355063501,
+                "trades": 34,
+                "coins": {
+                    "BTCUSDT_30m": -1077.942610450464,
+                    "TRXUSDT_30m": 318.48573606559864,
+                    "DOGEUSDT_15m": 1443.8244098912155
+                }
+            },
+            {
+                "month": "2026-05",
+                "profit": 872.4162379237943,
+                "trades": 31,
+                "coins": {
+                    "BTCUSDT_30m": -3471.715190668211,
+                    "TRXUSDT_30m": 5815.411872560468,
+                    "DOGEUSDT_15m": -1471.2804439684621
+                }
+            },
+            {
+                "month": "2026-06",
+                "profit": 7866.505549534049,
+                "trades": 33,
+                "coins": {
+                    "BTCUSDT_30m": 3603.4674917558914,
+                    "TRXUSDT_30m": 2399.4388447319693,
+                    "DOGEUSDT_15m": 1863.5992130461818
+                }
+            }
+        ]
+    },
+    {
+        "name": "\u067e\u0648\u0631\u062a\u0641\u0648\u0644\u06cc\u0648 \u06f4 (\u0641\u0648\u0642 \u0627\u06cc\u0645\u0646) \ud83d\udee1\ufe0f",
+        "weights": {
+            "TRXUSDT_30m": 0.0243,
+            "BTCUSDT_30m": 0.0214,
+            "DOGEUSDT_15m": 0.0145
+        },
+        "return": 141.77644572105845,
+        "mdd": 15.62847216653542,
+        "monthly_avg": 11.814703810088204,
+        "eq_curve": [
+            10000,
+            10392.607684053906,
+            10143.764712831233,
+            10637.37067431259,
+            10336.246376464556,
+            10104.787812266444,
+            11560.147386171027,
+            12805.80104403472,
+            13384.954221058515,
+            12882.42366178633,
+            12648.054948541323,
+            13047.958559000639,
+            12502.774724533418,
+            13289.04293316122,
+            14343.072323252267,
+            13827.42953527387,
+            12854.448803656447,
+            12531.686186792527,
+            13892.494165859836,
+            13065.688146630015,
+            13098.572762005773,
+            13110.56444240838,
+            12767.809276414317,
+            12716.544176289286,
+            13550.250373919185,
+            12457.940156497281,
+            13559.617957770155,
+            14135.85479217526,
+            14066.142166168787,
+            13741.921467553442,
+            15496.572157077026,
+            16368.079649107573,
+            16739.4871404967,
+            14839.10669459373,
+            16781.48347042662,
+            16720.56891280062,
+            16525.456674808604,
+            18458.1412839339,
+            17633.15961984948,
+            18583.95086035534,
+            18529.774685771496,
+            18992.975160469534,
+            19913.217887839553,
+            18519.69547565284,
+            18248.696719991447,
+            18735.94410221348,
+            18300.207253181976,
+            20121.651403710875,
+            18814.536398182587,
+            22663.55070229671,
+            24781.936666253598,
+            26975.060349897856,
+            25975.124350328082
+        ],
+        "logs": [
+            {
+                "month": "2025-06",
+                "profit": 319.31522872876064,
+                "trades": 4,
+                "coins": {
+                    "TRXUSDT_30m": 0.0,
+                    "BTCUSDT_30m": 140.96059441374527,
+                    "DOGEUSDT_15m": 178.35463431501537
+                }
+            },
+            {
+                "month": "2025-07",
+                "profit": -214.52741646231775,
+                "trades": 31,
+                "coins": {
+                    "TRXUSDT_30m": -668.000881669452,
+                    "BTCUSDT_30m": 363.2876728241067,
+                    "DOGEUSDT_15m": 90.18579238302752
+                }
+            },
+            {
+                "month": "2025-08",
+                "profit": 3158.7058399553575,
+                "trades": 32,
+                "coins": {
+                    "TRXUSDT_30m": 226.0182325308876,
+                    "BTCUSDT_30m": 3013.2135119640025,
+                    "DOGEUSDT_15m": -80.52590453953215
+                }
+            },
+            {
+                "month": "2025-09",
+                "profit": 25.549280939425387,
+                "trades": 24,
+                "coins": {
+                    "TRXUSDT_30m": -240.54872024391042,
+                    "BTCUSDT_30m": 387.49342946685147,
+                    "DOGEUSDT_15m": -121.39542828351551
+                }
+            },
+            {
+                "month": "2025-10",
+                "profit": 16.612707802747764,
+                "trades": 32,
+                "coins": {
+                    "TRXUSDT_30m": -711.7002085274374,
+                    "BTCUSDT_30m": 1406.0287350870358,
+                    "DOGEUSDT_15m": -677.7158187568506
+                }
+            },
+            {
+                "month": "2025-11",
+                "profit": -550.6562465249403,
+                "trades": 23,
+                "coins": {
+                    "TRXUSDT_30m": -391.80286977722875,
+                    "BTCUSDT_30m": -700.3572519602828,
+                    "DOGEUSDT_15m": 541.5038752125713
+                }
+            },
+            {
+                "month": "2025-12",
+                "profit": 66.08433895856808,
+                "trades": 30,
+                "coins": {
+                    "TRXUSDT_30m": -336.61131474552417,
+                    "BTCUSDT_30m": -960.1327842222913,
+                    "DOGEUSDT_15m": 1362.8284379263832
+                }
+            },
+            {
+                "month": "2026-01",
+                "profit": 688.3469009370571,
+                "trades": 28,
+                "coins": {
+                    "TRXUSDT_30m": 58.82142433073682,
+                    "BTCUSDT_30m": 1101.1380057320648,
+                    "DOGEUSDT_15m": -471.61252912574463
+                }
+            },
+            {
+                "month": "2026-02",
+                "profit": 3237.864333516908,
+                "trades": 32,
+                "coins": {
+                    "TRXUSDT_30m": 338.5038478769467,
+                    "BTCUSDT_30m": 1154.5956871910703,
+                    "DOGEUSDT_15m": 1744.7647984488917
+                }
+            },
+            {
+                "month": "2026-03",
+                "profit": 625.1518091969876,
+                "trades": 35,
+                "coins": {
+                    "TRXUSDT_30m": 163.54185797652133,
+                    "BTCUSDT_30m": 762.4037160598157,
+                    "DOGEUSDT_15m": -300.79376483934885
+                }
+            },
+            {
+                "month": "2026-04",
+                "profit": 348.65071396738733,
+                "trades": 34,
+                "coins": {
+                    "TRXUSDT_30m": 240.2680966696579,
+                    "BTCUSDT_30m": -709.7868174859361,
+                    "DOGEUSDT_15m": 818.1694347836657
+                }
+            },
+            {
+                "month": "2026-05",
+                "profit": 1093.4389071666487,
+                "trades": 31,
+                "coins": {
+                    "TRXUSDT_30m": 4325.066132553196,
+                    "BTCUSDT_30m": -2440.1048222183213,
+                    "DOGEUSDT_15m": -791.522403168226
+                }
+            },
+            {
+                "month": "2026-06",
+                "profit": 5363.1081739232495,
+                "trades": 33,
+                "coins": {
+                    "TRXUSDT_30m": 1737.3799503455978,
+                    "BTCUSDT_30m": 2598.589666789295,
+                    "DOGEUSDT_15m": 1027.138556788357
+                }
+            }
+        ]
+    },
+    {
+        "name": "\u067e\u0648\u0631\u062a\u0641\u0648\u0644\u06cc\u0648 \u06f5 (\u062a\u0639\u0627\u062f\u0644) \u26a1",
+        "weights": {
+            "TRXUSDT_30m": 0.0286,
+            "DOGEUSDT_15m": 0.0247,
+            "BTCUSDT_30m": 0.0215
+        },
+        "return": 179.38587079930898,
+        "mdd": 20.973559710927994,
+        "monthly_avg": 14.948822566609081,
+        "eq_curve": [
+            10000,
+            10584.128627780834,
+            10105.487224117689,
+            10770.830080235668,
+            10501.72011674677,
+            10124.94979285833,
+            11790.818602064062,
+            13024.277295247257,
+            13476.902360990276,
+            13069.947988329039,
+            12759.181509812815,
+            13433.634378882667,
+            12696.7491542523,
+            13170.86163096986,
+            14264.73885338412,
+            13272.12583885306,
+            11997.628636162752,
+            11789.591256875015,
+            13419.074786659312,
+            12660.185343507357,
+            12794.314907949287,
+            12932.023869112929,
+            12551.529027043965,
+            12748.897612510187,
+            13837.286009060073,
+            12625.009618809952,
+            14182.620025169426,
+            15185.861796162759,
+            14859.167976267925,
+            14025.399460094603,
+            15634.583856238112,
+            16671.615822591113,
+            17936.322072599563,
+            15127.340808711275,
+            18238.274662793396,
+            17686.002363415213,
+            17821.775740574772,
+            19962.311813703327,
+            19165.613008120315,
+            19905.8322515583,
+            20634.78953638694,
+            21405.581660538006,
+            22509.247091715686,
+            20545.94197631951,
+            19972.491479768665,
+            20564.851009101807,
+            20127.601307442354,
+            22861.105134463607,
+            20874.897088953192,
+            25970.31899355582,
+            28521.27954603882,
+            31567.708356618485,
+            30639.76049449468
+        ],
+        "logs": [
+            {
+                "month": "2025-06",
+                "profit": 441.90030956600117,
+                "trades": 4,
+                "coins": {
+                    "TRXUSDT_30m": 0.0,
+                    "DOGEUSDT_15m": 298.60784522704074,
+                    "BTCUSDT_30m": 143.29246433896046
+                }
+            },
+            {
+                "month": "2025-07",
+                "profit": -316.9505167076732,
+                "trades": 31,
+                "coins": {
+                    "TRXUSDT_30m": -813.992176993008,
+                    "DOGEUSDT_15m": 129.2654833643735,
+                    "BTCUSDT_30m": 367.7761769209615
+                }
+            },
+            {
+                "month": "2025-08",
+                "profit": 3170.8028656269894,
+                "trades": 32,
+                "coins": {
+                    "TRXUSDT_30m": 271.3232303944436,
+                    "DOGEUSDT_15m": -170.9029625278784,
+                    "BTCUSDT_30m": 3070.3825977604247
+                }
+            },
+            {
+                "month": "2025-09",
+                "profit": -124.8910275154675,
+                "trades": 24,
+                "coins": {
+                    "TRXUSDT_30m": -285.91698865056065,
+                    "DOGEUSDT_15m": -232.64909949536735,
+                    "BTCUSDT_30m": 393.6750606304607
+                }
+            },
+            {
+                "month": "2025-10",
+                "profit": -560.7971955488034,
+                "trades": 32,
+                "coins": {
+                    "TRXUSDT_30m": -790.1201384652459,
+                    "DOGEUSDT_15m": -1160.7825397477,
+                    "BTCUSDT_30m": 1390.1054826641425
+                }
+            },
+            {
+                "month": "2025-11",
+                "profit": -264.2944764882759,
+                "trades": 23,
+                "coins": {
+                    "TRXUSDT_30m": -445.38753275171064,
+                    "DOGEUSDT_15m": 861.1191031566939,
+                    "BTCUSDT_30m": -680.0260468932586
+                }
+            },
+            {
+                "month": "2025-12",
+                "profit": 906.1317575324762,
+                "trades": 30,
+                "coins": {
+                    "TRXUSDT_30m": -378.8412833694532,
+                    "DOGEUSDT_15m": 2256.063367459059,
+                    "BTCUSDT_30m": -971.0903265571293
+                }
+            },
+            {
+                "month": "2026-01",
+                "profit": 369.29192405269856,
+                "trades": 28,
+                "coins": {
+                    "TRXUSDT_30m": 89.1988072303975,
+                    "DOGEUSDT_15m": -880.271071169499,
+                    "BTCUSDT_30m": 1160.3641879918007
+                }
+            },
+            {
+                "month": "2026-02",
+                "profit": 4556.17842559199,
+                "trades": 32,
+                "coins": {
+                    "TRXUSDT_30m": 393.6081456148105,
+                    "DOGEUSDT_15m": 3046.793306588336,
+                    "BTCUSDT_30m": 1115.7769733888433
+                }
+            },
+            {
+                "month": "2026-03",
+                "profit": 425.0408887833155,
+                "trades": 35,
+                "coins": {
+                    "TRXUSDT_30m": 206.97325813021268,
+                    "DOGEUSDT_15m": -611.3626304166804,
+                    "BTCUSDT_30m": 829.430261069783
+                }
+            },
+            {
+                "month": "2026-04",
+                "profit": 907.2460466001619,
+                "trades": 34,
+                "coins": {
+                    "TRXUSDT_30m": 299.22586278664,
+                    "DOGEUSDT_15m": 1426.274584940301,
+                    "BTCUSDT_30m": -818.2544011267793
+                }
+            },
+            {
+                "month": "2026-05",
+                "profit": 1365.2380874597818,
+                "trades": 31,
+                "coins": {
+                    "TRXUSDT_30m": 5631.580470618108,
+                    "DOGEUSDT_15m": -1548.0923931917932,
+                    "BTCUSDT_30m": -2718.2499899665327
+                }
+            },
+            {
+                "month": "2026-06",
+                "profit": 7063.689990977718,
+                "trades": 33,
+                "coins": {
+                    "TRXUSDT_30m": 2326.0157765367467,
+                    "DOGEUSDT_15m": 1893.1301620118256,
+                    "BTCUSDT_30m": 2844.544052429143
+                }
+            }
+        ]
+    }
+];
+
+        let pieChartInstance, lineChartInstance;
+
+        // UI Flow
+        function openModal() { document.getElementById('auth-modal').classList.add('active'); }
+        function closeModal() { document.getElementById('auth-modal').classList.remove('active'); }
+        
+        function login() {
+            closeModal();
+            document.getElementById('landing-page').style.display = 'none';
+            document.getElementById('dashboard-page').style.display = 'block';
+            document.getElementById('bg-anim').style.display = 'block';
+            if(!pieChartInstance) {
+                initSidebar();
+                initCharts();
+                loadPortfolio(0);
+            }
+        }
+
+        function showLanding() {
+            document.getElementById('dashboard-page').style.display = 'none';
+            document.getElementById('bg-anim').style.display = 'none';
+            document.getElementById('landing-page').style.display = 'flex';
+        }
+
+        function getCoinEmoji(coin) {
+            if(coin.includes('BTC')) return '👑';
+            if(coin.includes('DOGE')) return '🐶';
+            if(coin.includes('TRX')) return '🔴';
+            if(coin.includes('AVAX')) return '🔺';
+            return '🪙';
+        }
+
+        function initSidebar() {
+            const sidebarDiv = document.getElementById('sidebar-tabs');
+            portfolios.forEach((p, idx) => {
+                const btn = document.createElement('button');
+                btn.className = idx === 0 ? 'port-btn active' : 'port-btn';
+                btn.innerText = p.name;
+                btn.onclick = () => loadPortfolio(idx);
+                sidebarDiv.appendChild(btn);
+            });
+        }
+
+        function initCharts() {
+            Chart.defaults.color = '#888';
+            Chart.defaults.font.family = "'Vazirmatn', sans-serif";
+
+            const pieCtx = document.getElementById('pieChart').getContext('2d');
+            pieChartInstance = new Chart(pieCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: [],
+                    datasets: [{
+                        data: [],
+                        backgroundColor: ['#00ffcc', '#7000ff', '#ff007f', '#f59e0b'],
+                        borderWidth: 0,
+                        hoverOffset: 10
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    cutout: '75%',
+                    plugins: {
+                        legend: { position: 'bottom', labels: { color: '#fff', font: { size: 12 } } }
+                    }
+                }
+            });
+
+            const lineCtx = document.getElementById('lineChart').getContext('2d');
+            let gradient = lineCtx.createLinearGradient(0, 0, 0, 400);
+            gradient.addColorStop(0, 'rgba(0, 255, 204, 0.4)');
+            gradient.addColorStop(1, 'rgba(0, 255, 204, 0.0)');
+
+            lineChartInstance = new Chart(lineCtx, {
+                type: 'line',
+                data: {
+                    labels: [],
+                    datasets: [{
+                        label: 'موجودی (دلار)',
+                        data: [],
+                        borderColor: '#00ffcc',
+                        backgroundColor: gradient,
+                        borderWidth: 3,
+                        pointBackgroundColor: '#050505',
+                        pointBorderColor: '#00ffcc',
+                        pointRadius: 0,
+                        fill: true,
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: { grid: { color: 'rgba(255,255,255,0.05)' } },
+                        x: { grid: { display: false } }
+                    },
+                    plugins: {
+                        legend: { display: false }
+                    }
+                }
+            });
+        }
+
+        function loadPortfolio(idx) {
+            // Update tabs
+            document.querySelectorAll('.port-btn').forEach((b, i) => b.className = i === idx ? 'port-btn active' : 'port-btn');
+
+            const p = portfolios[idx];
+            
+            // Subtitle string
+            const subtitleParts = Object.entries(p.weights).map(([k, v]) => `${k} (${(v*100).toFixed(2)}%) ${getCoinEmoji(k)}`);
+            document.getElementById('dash-subtitle').innerText = `ترکیب: ${subtitleParts.join(' + ')}`;
+
+            // Stats
+            const finalCap = 10000 + (10000 * (p.return / 100));
+            document.getElementById('stat-final').innerText = '$' + Math.round(finalCap).toLocaleString();
+            document.getElementById('stat-return').innerText = '+' + p.return.toFixed(1) + '%';
+            document.getElementById('stat-mdd').innerText = p.mdd.toFixed(1) + '%';
+
+            // Update Charts
+            const coinNames = Object.keys(p.weights).map(c => c.replace('USDT_', ' '));
+            const coinWeights = Object.values(p.weights).map(v => (v*100).toFixed(2));
+            pieChartInstance.data.labels = coinNames;
+            pieChartInstance.data.datasets[0].data = coinWeights;
+            pieChartInstance.update();
+
+            lineChartInstance.data.labels = Array(p.eq_curve.length).fill('');
+            lineChartInstance.data.datasets[0].data = p.eq_curve;
+            lineChartInstance.update();
+
+            // Logs
+            let winMonths = 0;
+            const grid = document.getElementById('logsGrid');
+            grid.innerHTML = '';
+            
+            p.logs.forEach(log => {
+                const isPositive = log.profit >= 0;
+                if(isPositive && log.profit > 10) winMonths++;
+                
+                const cardClass = isPositive ? 'log-card positive' : 'log-card negative';
+                const emoji = isPositive ? '🟢' : '🔴';
+                const sign = isPositive ? '+' : '';
+
+                let coinsHtml = '';
+                for(const [coin, pnl] of Object.entries(log.coins)) {
+                    const coinClass = pnl >= 0 ? 'win' : 'loss';
+                    const coinSign = pnl >= 0 ? '+' : '';
+                    coinsHtml += `
+                        <div class="coin-row">
+                            <span>${coin.replace('USDT_', ' ')} ${getCoinEmoji(coin)}</span>
+                            <span class="${coinClass}">${coinSign}$${Math.round(pnl)}</span>
+                        </div>
+                    `;
+                }
+
+                grid.innerHTML += `
+                    <div class="${cardClass}">
+                        <div class="month-title">
+                            <span>${log.month}</span>
+                            <span style="color: ${isPositive ? 'var(--primary)' : 'var(--danger)'}">${sign}$${Math.round(log.profit)} ${emoji}</span>
+                        </div>
+                        <div style="font-size: 0.8rem; margin-bottom: 1rem; color: #888;">تعداد معاملات: ${log.trades}</div>
+                        <div class="coin-breakdown">
+                            ${coinsHtml}
+                        </div>
+                    </div>
+                `;
+            });
+
+            document.getElementById('win-months').innerText = `${winMonths} ماه سودده / ${p.logs.length} ماه`;
+        }
+
+    </script>
+</body>
+</html>

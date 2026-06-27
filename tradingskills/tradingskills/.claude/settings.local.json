@@ -1,0 +1,42 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(cp /Users/nima/Downloads/tradingskills/soul.md /Users/nima/tradingskills/soul.md)",
+      "Bash(ln /Users/nima/Downloads/tradingskills/soul.md /Users/nima/tradingskills/soul_ln.md)",
+      "Bash(mv -n /Users/nima/Downloads/tradingskills/soul.md /Users/nima/tradingskills/soul.md)",
+      "Bash(echo hi *)",
+      "Read(//Users/nima/tradingskills/**)",
+      "Bash(rm /Users/nima/tradingskills/_probe.txt)",
+      "Read(//Users/nima/**)",
+      "Bash(mkdir -p /Users/nima/tradingskills)",
+      "Bash(mv -n /Users/nima/Downloads/tradingskills/soul.md /Users/nima/tradingskills/soul_mv.md)",
+      "Bash(timeout 15 find /Users/nima -maxdepth 4 -name 'skill.md')",
+      "Bash(echo \"exit: $?\")",
+      "Bash(dd if=/Users/nima/Downloads/tradingskills/agent.md bs=1024 count=2)",
+      "Bash(echo \"EXIT: $?\")",
+      "Bash(echo \"---EXIT:$?\")",
+      "Bash(xattr -l /Users/nima/Downloads/tradingskills/skill.md)",
+      "Bash(python3 -c \"print\\(open\\('/Users/nima/Downloads/tradingskills/agent.md'\\).read\\(\\)[:200]\\)\")",
+      "Bash(python3 -c \"print\\(open\\('/Users/nima/Downloads/tradingskills/skill.md'\\).read\\(\\)\\)\")",
+      "Bash(echo \"=== EXIT: $? ===\")",
+      "Bash(dd if=/Users/nima/Downloads/tradingskills/skill.md bs=1 count=200)",
+      "Bash(/bin/cat /Users/nima/Downloads/tradingskills/skill.md)",
+      "Bash(python3 -c \"print\\(open\\('/Users/nima/Downloads/tradingskills/skill.md'\\).read\\(\\)[:200]\\)\")",
+      "Bash(dd if=/Users/nima/Downloads/tradingskills/skill.md bs=1 count=100)",
+      "Bash(xattr /Users/nima/Downloads/tradingskills/soul.md)",
+      "Bash(echo \"cp exit: $?\")",
+      "Bash(mv /Users/nima/Downloads/tradingskills/agent.md /Users/nima/agent_review.md)",
+      "Bash(ln /Users/nima/Downloads/tradingskills/agent.md /Users/nima/agent_review_link.md)",
+      "Bash(touch /Users/nima/_tcc_test)",
+      "Bash(rm /Users/nima/_tcc_test)",
+      "Bash(dd if=/Users/nima/Downloads/tradingskills/soul.md of=/tmp/soul_dd.md)",
+      "Bash(python3 -c \"print\\(open\\('/Users/nima/Downloads/tradingskills/soul.md'\\).read\\(\\)[:100]\\)\")",
+      "Bash(echo \"exit=$?\")",
+      "Bash(osascript -e 'set f to POSIX file \"/Users/nima/Downloads/tradingskills/agent.md\"' -e 'read f')",
+      "Bash(echo \"---EXIT: $?---\")",
+      "Bash(mv /Users/nima/Downloads/tradingskills/agent.md /Users/nima/tradingskills/agent.md)",
+      "Bash(echo \"mv exit: $?\")",
+      "Bash(dd if=/Users/nima/Downloads/tradingskills/agent.md bs=1 count=100)"
+    ]
+  }
+}

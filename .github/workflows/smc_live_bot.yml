@@ -1,0 +1,40 @@
+name: SMC Aggressive Portfolio Live Bot
+
+on:
+  schedule:
+    # Runs every 15 minutes
+    - cron: '*/15 * * * *'
+  workflow_dispatch:
+
+jobs:
+  run-bot:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v3
+      
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.10'
+        
+    - name: Install Dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install pandas numpy ta ccxt requests
+        
+    - name: Run Live Bot
+      env:
+        TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+        TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        PAPER_TRADE_START: "2026-06-27 00:00:00"
+      run: python smc_live_bot.py
+      
+    - name: Commit state.json
+      run: |
+        git config --global user.name 'SMC Bot'
+        git config --global user.email 'smc-bot@users.noreply.github.com'
+        git add state.json
+        # Only commit if there are changes
+        git diff --quiet && git diff --staged --quiet || (git commit -m "Update paper trading state" && git push)
