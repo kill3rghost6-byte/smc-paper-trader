@@ -8,7 +8,7 @@ import os
 import requests
 import json
 
-TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN", "")
+TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN", "8233036914:AAF699ijYWDwJebEKu__CH6QUrNvLx2TPnA")
 TELEGRAM_CHAT_ID = os.getenv("TELEGRAM_CHAT_ID", "")
 PAPER_TRADE_START = pd.to_datetime(os.getenv("PAPER_TRADE_START", datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")))
 
@@ -292,8 +292,9 @@ def run_portfolio():
         }
         
     initial_balance_run = state_data['balance']
+    # send_telegram("🔥 **SMC Aggressive Bot (Paper Trading) Started** 🔥") # حذف پیام اسپم استارت
     
-    send_telegram("🔥 **SMC Aggressive Bot (Paper Trading) Started** 🔥")
+    any_action = False
     
     for symbol, info in portfolio.items():
         try:
@@ -307,6 +308,7 @@ def run_portfolio():
             state = get_live_state(df, tick, symbol)
             
             # Process new trades for Paper Trading
+            trade_closed_this_run = False
             for trade in state['completed_trades']:
                 exit_time = pd.to_datetime(trade['exit_time'])
                 if exit_time >= PAPER_TRADE_START and trade['id'] not in state_data['history_ids']:
@@ -320,35 +322,42 @@ def run_portfolio():
                     msg_trade += f"PnL: ${trade_pnl:.2f}\n"
                     msg_trade += f"New Balance: ${state_data['balance']:.2f}"
                     send_telegram(msg_trade)
+                    trade_closed_this_run = True
             
-            msg = f"🔍 **{symbol} ({tf})** - Time: {state['timestamp']} UTC\n"
-            if state['position'] != 0:
-                direction = "LONG 🟢" if state['position'] == 1 else "SHORT 🔴"
-                msg += f"Currently IN POSITION: {direction}\n"
-                msg += f"SL: {state['sl']:.5f}\n"
-                msg += f"TP1 Reached: {'Yes ✅' if state['tp1_done'] else 'No ⌛'}\n"
-                msg += f"SL at BE: {'Yes 🛡️' if state['sl_moved_to_be'] else 'No ⚠️'}\n"
-            elif state['limit_type'] != 0:
-                direction = "LONG 🟢" if state['limit_type'] == 1 else "SHORT 🔴"
-                msg += f"⚠️ **LIMIT ORDER ACTIVE** ⚠️\n"
-                msg += f"Type: Limit {direction} | Risk: {risk * 100:.2f}%\n"
-                msg += f"Entry: {state['entry_price']:.5f} | SL: {state['sl']:.5f}\n"
-                msg += f"TP1: {state['tp1']:.5f} | TP2: {state['tp2']:.5f}\n"
-            else:
-                msg += "No active limits or positions. ⏳\n"
-                
-            send_telegram(msg)
+            # فقط زمانی پیام بده که پوزیشن یا اوردر فعالی وجود داشته باشد
+            if state['position'] != 0 or state['limit_type'] != 0:
+                any_action = True
+                msg = f"🔍 **{symbol} ({tf})** - Time: {state['timestamp']} UTC\n"
+                if state['position'] != 0:
+                    direction = "LONG 🟢" if state['position'] == 1 else "SHORT 🔴"
+                    msg += f"Currently IN POSITION: {direction}\n"
+                    msg += f"SL: {state['sl']:.5f}\n"
+                    msg += f"TP1 Reached: {'Yes ✅' if state['tp1_done'] else 'No ⌛'}\n"
+                    msg += f"SL at BE: {'Yes 🛡️' if state['sl_moved_to_be'] else 'No ⚠️'}\n"
+                elif state['limit_type'] != 0:
+                    direction = "LONG 🟢" if state['limit_type'] == 1 else "SHORT 🔴"
+                    msg += f"⚠️ **LIMIT ORDER ACTIVE** ⚠️\n"
+                    msg += f"Type: Limit {direction} | Risk: {risk * 100:.2f}%\n"
+                    msg += f"Entry: {state['entry_price']:.5f} | SL: {state['sl']:.5f}\n"
+                    msg += f"TP1: {state['tp1']:.5f} | TP2: {state['tp2']:.5f}\n"
+                send_telegram(msg)
+            elif trade_closed_this_run:
+                any_action = True
             
         except Exception as e:
             send_telegram(f"❌ Error processing {symbol}: {str(e)}")
+            any_action = True
             
     # Save State
     with open(state_file, 'w') as f:
         json.dump(state_data, f, indent=4)
         
-    # Summary
+    # Summary (only if balance changed or nothing happened)
     if state_data['balance'] != initial_balance_run:
-        send_telegram(f"💰 **PAPER TRADING SUMMARY** 💰\nBalance: ${state_data['balance']:.2f}")
+        send_telegram(f"💰 **PAPER TRADING BALANCE UPDATED** 💰\nNew Balance: ${state_data['balance']:.2f}")
+    elif not any_action:
+        # User requested to see everything it does, so we send a single summary message per run instead of absolute silence.
+        send_telegram(f"✅ **SMC Scan Complete** | Balance: ${state_data['balance']:.2f}\nNo active setups or positions right now.")
 
 if __name__ == '__main__':
     run_portfolio()
