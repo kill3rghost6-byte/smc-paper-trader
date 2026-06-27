@@ -296,7 +296,9 @@ def get_live_state(df, tick_size, symbol):
         'tp2': current_tp_price,
         'sl_moved_to_be': sl == entry_price if position != 0 else False,
         'tp1_done': tp1_done,
-        'completed_trades': completed_trades
+        'completed_trades': completed_trades,
+        'lock_swing_high': lock_swing_high,
+        'lock_swing_low': lock_swing_low
     }
 
 def save_and_push_state(state_data, state_file='state.json'):
@@ -360,46 +362,134 @@ def run_portfolio():
             df = compute_indicators(df)
             state = get_live_state(df, tick, symbol)
             
-            # Process new trades for Paper Trading
-            trade_closed_this_run = False
-            for trade in state['completed_trades']:
-                exit_time = pd.to_datetime(trade['exit_time'])
-                
-                # Prevent historical ghost trades: only process trades that closed within the last 6 hours
-                is_recent = (now - exit_time) <= datetime.timedelta(hours=6)
-                
-                if exit_time >= PAPER_TRADE_START and is_recent and trade['id'] not in state_data['history_ids']:
-                    trade_pnl = state_data['balance'] * risk * trade['r_multiple']
-                    state_data['balance'] += trade_pnl
-                    state_data['history_ids'].append(trade['id'])
-                    
-                    msg_trade = f"🚨 **PAPER TRADE CLOSED: {symbol}** 🚨\n"
-                    msg_trade += f"Direction: {trade['direction']}\n"
-                    msg_trade += f"R-Multiple: {trade['r_multiple']:.2f}R\n"
-                    msg_trade += f"PnL: ${trade_pnl:.2f}\n"
-                    msg_trade += f"New Balance: ${state_data['balance']:.2f}"
-                    send_telegram(msg_trade)
-                    trade_closed_this_run = True
+            # STATEFUL EXECUTION ENGINE
+            if 'live_positions' not in state_data: state_data['live_positions'] = {}
+            if 'live_orders' not in state_data: state_data['live_orders'] = {}
             
-            # فقط زمانی پیام بده که پوزیشن یا اوردر فعالی وجود داشته باشد
-            if state['position'] != 0 or state['limit_type'] != 0:
+            last_candle = df.iloc[-1]
+            h = float(last_candle['high'])
+            l = float(last_candle['low'])
+            c = float(last_candle['close'])
+            ts = str(last_candle.name)
+            
+            # 1. Handle Active Positions
+            if symbol in state_data['live_positions']:
+                pos = state_data['live_positions'][symbol]
+                hit_sl = False
+                hit_tp2 = False
+                
+                if pos['direction'] == 'LONG':
+                    if c > pos['lock_swing_high'] and not pos['sl_moved_to_be']:
+                        pos['sl'] = pos['entry']
+                        pos['sl_moved_to_be'] = True
+                        send_telegram(f"🛡️ **{symbol}**: Stop Loss moved to Break-Even!")
+                        
+                    hit_sl = l <= pos['sl']
+                    hit_tp1 = h >= pos['tp1'] and not pos['tp1_done']
+                    hit_tp2 = h >= pos['tp2']
+                    
+                    if hit_tp1:
+                        pos['tp1_done'] = True
+                        send_telegram(f"✅ **{symbol}**: TP1 Hit! Risk eliminated.")
+                        
+                else: # SHORT
+                    if c < pos['lock_swing_low'] and not pos['sl_moved_to_be']:
+                        pos['sl'] = pos['entry']
+                        pos['sl_moved_to_be'] = True
+                        send_telegram(f"🛡️ **{symbol}**: Stop Loss moved to Break-Even!")
+                        
+                    hit_sl = h >= pos['sl']
+                    hit_tp1 = l <= pos['tp1'] and not pos['tp1_done']
+                    hit_tp2 = l <= pos['tp2']
+                    
+                    if hit_tp1:
+                        pos['tp1_done'] = True
+                        send_telegram(f"✅ **{symbol}**: TP1 Hit! Risk eliminated.")
+                        
+                if hit_sl or hit_tp2:
+                    exit_price = pos['sl'] if hit_sl else pos['tp2']
+                    risk_amount = pos['entry'] - pos['initial_sl'] if pos['direction'] == 'LONG' else pos['initial_sl'] - pos['entry']
+                    r_multiple = (exit_price - pos['entry']) / risk_amount if pos['direction'] == 'LONG' else (pos['entry'] - exit_price) / risk_amount
+                    if risk_amount == 0: r_multiple = 0
+                    
+                    trade_pnl = state_data['balance'] * risk * r_multiple
+                    state_data['balance'] += trade_pnl
+                    
+                    res_emoji = "🎯 TP2 FULL WIN" if hit_tp2 else "🔴 STOP LOSS"
+                    if hit_sl and pos['sl_moved_to_be']: res_emoji = "🛡️ BREAK-EVEN"
+                    
+                    msg = f"🚨 **PAPER TRADE CLOSED: {symbol}** 🚨\nDirection: {pos['direction']}\nResult: {res_emoji}\nR-Multiple: {r_multiple:.2f}R\nPnL: ${trade_pnl:.2f}\nNew Balance: ${state_data['balance']:.2f}"
+                    send_telegram(msg)
+                    
+                    del state_data['live_positions'][symbol]
+                
                 any_action = True
-                msg = f"🔍 **{symbol} ({tf})** - Time: {state['timestamp']} UTC\n"
-                if state['position'] != 0:
-                    direction = "LONG 🟢" if state['position'] == 1 else "SHORT 🔴"
-                    msg += f"Currently IN POSITION: {direction}\n"
-                    msg += f"SL: {state['sl']:.5f}\n"
-                    msg += f"TP1 Reached: {'Yes ✅' if state['tp1_done'] else 'No ⌛'}\n"
-                    msg += f"SL at BE: {'Yes 🛡️' if state['sl_moved_to_be'] else 'No ⚠️'}\n"
-                elif state['limit_type'] != 0:
-                    direction = "LONG 🟢" if state['limit_type'] == 1 else "SHORT 🔴"
-                    msg += f"⚠️ **LIMIT ORDER ACTIVE** ⚠️\n"
-                    msg += f"Type: Limit {direction} | Risk: {risk * 100:.2f}%\n"
-                    msg += f"Entry: {state['entry_price']:.5f} | SL: {state['sl']:.5f}\n"
-                    msg += f"TP1: {state['tp1']:.5f} | TP2: {state['tp2']:.5f}\n"
-                send_telegram(msg)
-            elif trade_closed_this_run:
-                any_action = True
+                    
+            # 2. Handle Limit Orders
+            elif symbol in state_data['live_orders']:
+                lo = state_data['live_orders'][symbol]
+                
+                # Check for invalidation first (Strategy cancelled it)
+                if state['limit_type'] == 0 and state['position'] == 0:
+                    send_telegram(f"⚠️ **{symbol}**: Setup Invalidated. Limit order cancelled.")
+                    del state_data['live_orders'][symbol]
+                    any_action = True
+                else:
+                    # Check if filled on this candle
+                    filled = False
+                    if lo['direction'] == 'LONG' and l <= lo['entry']:
+                        filled = True
+                        lo['entry'] = lo['entry'] + (tick * 2) # Slippage
+                    elif lo['direction'] == 'SHORT' and h >= lo['entry']:
+                        filled = True
+                        lo['entry'] = lo['entry'] - (tick * 2) # Slippage
+                        
+                    if filled:
+                        state_data['live_positions'][symbol] = lo
+                        del state_data['live_orders'][symbol]
+                        send_telegram(f"🟢 **{symbol}**: Limit Order FILLED!\nCurrently IN POSITION: {lo['direction']}\nEntry: {lo['entry']:.5f}\nSL: {lo['sl']:.5f}")
+                    
+                    any_action = True
+                        
+            # 3. Handle NEW Signals from get_live_state
+            else:
+                if state['limit_type'] != 0 and state['position'] == 0:
+                    direction = 'LONG' if state['limit_type'] == 1 else 'SHORT'
+                    
+                    state_data['live_orders'][symbol] = {
+                        'direction': direction,
+                        'entry': state['entry_price'],
+                        'initial_sl': state['sl'],
+                        'sl': state['sl'],
+                        'tp1': state['tp1'],
+                        'tp2': state['tp2'],
+                        'tp1_done': False,
+                        'sl_moved_to_be': False,
+                        'lock_swing_high': state['lock_swing_high'],
+                        'lock_swing_low': state['lock_swing_low']
+                    }
+                    msg = f"🔍 **{symbol} ({tf})** - Time: {ts} UTC\n⚠️ **LIMIT ORDER ACTIVE** ⚠️\nDirection: {direction}\nEntry: {state['entry_price']:.5f}\nSL: {state['sl']:.5f}\nTP2: {state['tp2']:.5f}"
+                    send_telegram(msg)
+                    any_action = True
+                    
+                elif state['position'] != 0:
+                    # Adopt existing backtest position
+                    direction = 'LONG' if state['position'] == 1 else 'SHORT'
+                    entry_adj = state['entry_price'] + (tick * 2) if direction == 'LONG' else state['entry_price'] - (tick * 2)
+                    state_data['live_positions'][symbol] = {
+                        'direction': direction,
+                        'entry': entry_adj, 
+                        'initial_sl': state['sl'], 
+                        'sl': state['sl'],
+                        'tp1': state['tp1'],
+                        'tp2': state['tp2'],
+                        'tp1_done': state['tp1_done'],
+                        'sl_moved_to_be': state['sl_moved_to_be'],
+                        'lock_swing_high': state['lock_swing_high'],
+                        'lock_swing_low': state['lock_swing_low']
+                    }
+                    send_telegram(f"🔄 **{symbol}**: Adopted active {direction} position from history.")
+                    any_action = True
             
         except Exception as e:
             error_str = str(e)
