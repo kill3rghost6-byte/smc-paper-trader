@@ -383,6 +383,7 @@ def run_portfolio():
                         pos['sl'] = pos['entry']
                         pos['sl_moved_to_be'] = True
                         send_telegram(f"🛡️ **{symbol}**: Stop Loss moved to Break-Even!")
+                    if h > pos['lock_swing_high']: pos['lock_swing_high'] = h
                         
                     hit_sl = l <= pos['sl']
                     hit_tp1 = h >= pos['tp1'] and not pos['tp1_done']
@@ -397,6 +398,7 @@ def run_portfolio():
                         pos['sl'] = pos['entry']
                         pos['sl_moved_to_be'] = True
                         send_telegram(f"🛡️ **{symbol}**: Stop Loss moved to Break-Even!")
+                    if l < pos['lock_swing_low']: pos['lock_swing_low'] = l
                         
                     hit_sl = h >= pos['sl']
                     hit_tp1 = l <= pos['tp1'] and not pos['tp1_done']
@@ -437,12 +439,16 @@ def run_portfolio():
                 else:
                     # Check if filled on this candle
                     filled = False
-                    if lo['direction'] == 'LONG' and l <= lo['entry']:
-                        filled = True
-                        lo['entry'] = lo['entry'] + (tick * 2) # Slippage
-                    elif lo['direction'] == 'SHORT' and h >= lo['entry']:
-                        filled = True
-                        lo['entry'] = lo['entry'] - (tick * 2) # Slippage
+                    if lo['direction'] == 'LONG':
+                        if h > lo['lock_swing_high']: lo['lock_swing_high'] = h
+                        if l <= lo['entry']:
+                            filled = True
+                            lo['entry'] = lo['entry'] + (tick * 2) # Slippage
+                    elif lo['direction'] == 'SHORT':
+                        if l < lo['lock_swing_low']: lo['lock_swing_low'] = l
+                        if h >= lo['entry']:
+                            filled = True
+                            lo['entry'] = lo['entry'] - (tick * 2) # Slippage
                         
                     if filled:
                         state_data['live_positions'][symbol] = lo
