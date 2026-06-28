@@ -36,10 +36,10 @@
             "direction": "SHORT",
             "entry": 42.68,
             "initial_sl": 42.794892598211625,
-            "sl": 42.794892598211625,
+            "sl": 42.68,
             "tp1": 42.48851233631395,
             "tp2": 42.33532220536512,
-            "tp1_done": false
+            "tp1_done": true
         }
     },
     "live_orders": {},
