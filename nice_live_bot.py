@@ -13,7 +13,9 @@ TELEGRAM_CHAT_ID = os.getenv("TELEGRAM_CHAT_ID", "5708853617")
 PAPER_TRADE_START = pd.to_datetime(os.getenv("PAPER_TRADE_START", datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")))
 
 def send_telegram(message, max_retries=3):
-    print(message)
+    print(f"Telegram Log (Disabled): {message}")
+    return
+
     if TELEGRAM_BOT_TOKEN and TELEGRAM_CHAT_ID:
         url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendMessage"
         for attempt in range(max_retries):
@@ -239,23 +241,41 @@ def run_portfolio():
                 hit_sl = False
                 hit_tp2 = False
                 
-                # Check TP1 to Break-Even (Using exact conditions from Pine: cur_pos < prev_pos)
-                # In live, we check if price reached TP1
+                # Default position size if not set (backwards compatibility)
+                if 'remaining_size' not in pos:
+                    pos['remaining_size'] = 1.0
+                
+                # Check TP1 Partial Close (75%)
                 if pos['direction'] == 'LONG':
                     if h >= pos['tp1'] and not pos['tp1_done']:
                         pos['tp1_done'] = True
                         pos['sl'] = pos['entry']
-                        send_telegram(f"✅ **{symbol}**: TP1 Hit! Stop Loss moved to Break-Even.")
+                        # Calculate profit for 75% at TP1
+                        r_multi_tp1 = (pos['tp1'] - pos['entry']) / (pos['entry'] - pos['initial_sl'])
+                        partial_pnl = state_data['balance'] * risk * r_multi_tp1 * 0.75
+                        state_data['balance'] += partial_pnl
+                        pos['remaining_size'] = 0.25
+                        pos['realized_pnl'] = partial_pnl
+                        send_telegram(f"✅ **{symbol}**: TP1 Hit! 75% of position closed for +${partial_pnl:.2f}. Stop Loss moved to Break-Even.")
+                        
                     hit_sl = l <= pos['sl']
                     hit_tp2 = h >= pos['tp2']
                 else:
                     if l <= pos['tp1'] and not pos['tp1_done']:
                         pos['tp1_done'] = True
                         pos['sl'] = pos['entry']
-                        send_telegram(f"✅ **{symbol}**: TP1 Hit! Stop Loss moved to Break-Even.")
+                        # Calculate profit for 75% at TP1
+                        r_multi_tp1 = (pos['entry'] - pos['tp1']) / (pos['initial_sl'] - pos['entry'])
+                        partial_pnl = state_data['balance'] * risk * r_multi_tp1 * 0.75
+                        state_data['balance'] += partial_pnl
+                        pos['remaining_size'] = 0.25
+                        pos['realized_pnl'] = partial_pnl
+                        send_telegram(f"✅ **{symbol}**: TP1 Hit! 75% of position closed for +${partial_pnl:.2f}. Stop Loss moved to Break-Even.")
+                        
                     hit_sl = h >= pos['sl']
                     hit_tp2 = l <= pos['tp2']
                 
+                # Handle Final Exit (TP2 or SL/Break-Even)
                 if hit_sl or hit_tp2:
                     exit_price = pos['sl'] if hit_sl else pos['tp2']
                     if pos['direction'] == 'LONG':
@@ -263,22 +283,19 @@ def run_portfolio():
                     else:
                         r_multi = (pos['entry'] - exit_price) / (pos['initial_sl'] - pos['entry'])
                         
-                    # If TP1 was done, we only hold 50% position
-                    pos_size = 0.5 if pos['tp1_done'] else 1.0
-                    if hit_tp2 and pos['tp1_done']:
-                        # The first 50% was closed at TP1 for +2.5R, second 50% at TP2 for +4.5R
-                        # The code here adds the PnL of the closing half.
-                        # Actually to simplify, let's just use R-multiple of the closing price and the remaining size
-                        pass
+                    trade_pnl = state_data['balance'] * risk * r_multi * pos['remaining_size']
+                    
+                    if hit_tp2: 
+                        res_emoji = "🚀 TP2 FULL WIN"
+                    elif hit_sl and pos['tp1_done']: 
+                        res_emoji = "⚖️ BREAK-EVEN (Remaining 25%)"
+                    else: 
+                        res_emoji = "❌ STOP LOSS (Full Loss)"
                         
-                    trade_pnl = state_data['balance'] * risk * r_multi * pos_size
-                    
-                    if hit_tp2: res_emoji = "🚀 TP2 FULL WIN"
-                    elif hit_sl and pos['tp1_done']: res_emoji = "⚖️ BREAK-EVEN"
-                    else: res_emoji = "❌ STOP LOSS"
-                    
                     state_data['balance'] += trade_pnl
-                    msg = f"🚨 **TRADE CLOSED: {symbol}** 🚨\nDirection: {pos['direction']}\nResult: {res_emoji}\nPnL: ${trade_pnl:.2f}\nNew Balance: ${state_data['balance']:.2f}"
+                    total_trade_pnl = pos.get('realized_pnl', 0.0) + trade_pnl
+                    
+                    msg = f"🚨 **TRADE CLOSED: {symbol}** 🚨\nDirection: {pos['direction']}\nResult: {res_emoji}\nFinal Leg PnL (25%): ${trade_pnl:.2f}\n💰 **TOTAL TRADE PNL**: ${total_trade_pnl:.2f}\nNew Balance: ${state_data['balance']:.2f}"
                     send_telegram(msg)
                     
                     state_data['cooldown'][symbol] = True
@@ -335,9 +352,34 @@ def run_continuous():
     start_time = time.time()
     max_duration = 5.5 * 3600 
     
+    last_heartbeat_time = 0
+    
     while time.time() - start_time < max_duration:
         try:
             run_portfolio()
+            
+            # 15-Minute Heartbeat Logic
+            current_time = time.time()
+            if current_time - last_heartbeat_time >= 15 * 60:
+                state_file = 'state.json'
+                if os.path.exists(state_file):
+                    with open(state_file, 'r') as f:
+                        state_data = json.load(f)
+                    
+                    bal = state_data.get('balance', 10000.0)
+                    positions = state_data.get('live_positions', {})
+                    pos_text = ""
+                    if len(positions) > 0:
+                        for sym, p in positions.items():
+                            pos_text += f"\n🔹 {sym} ({p['direction']}) | Entry: {p['entry']:.4f} | SL: {p['sl']:.4f}"
+                    else:
+                        pos_text = "\n🔹 No active positions."
+                        
+                    msg = f"⏳ **NICE v4.0 Status Update (15m)**\n💰 Balance: ${bal:,.2f}\n📊 Open Positions: {len(positions)}{pos_text}"
+                    send_telegram(msg)
+                
+                last_heartbeat_time = current_time
+                
         except Exception as e:
             print("Error in run_portfolio:", e)
             
