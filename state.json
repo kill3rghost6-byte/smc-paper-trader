@@ -40,11 +40,19 @@
             "tp1": 6.4948195621595435,
             "tp2": 6.565875211887178,
             "tp1_done": false
+        },
+        "LTCUSDT": {
+            "direction": "SHORT",
+            "entry": 42.34,
+            "initial_sl": 42.442963868457,
+            "sl": 42.442963868457,
+            "tp1": 42.16839355257168,
+            "tp2": 42.03110839462902,
+            "tp1_done": false
         }
     },
     "live_orders": {},
     "cooldown": {
-        "TONUSDT": true,
-        "HBARUSDT": true
+        "TONUSDT": true
     }
 }
