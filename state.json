@@ -1,19 +1,10 @@
 {
-    "balance": 7961.887448195035,
+    "balance": 7646.596705246511,
     "history_ids": [
         "DOGEUSDT_1782564300.0",
         "DOGEUSDT_1782560700.0"
     ],
     "live_positions": {
-        "TRXUSDT": {
-            "direction": "LONG",
-            "entry": 0.3235,
-            "initial_sl": 0.3226224752989867,
-            "sl": 0.3226224752989867,
-            "tp1": 0.32496254116835555,
-            "tp2": 0.3261325741030399,
-            "tp1_done": false
-        },
         "BTCUSDT": {
             "direction": "SHORT",
             "entry": 59690.62,
@@ -30,15 +21,6 @@
             "sl": 0.07359025699484069,
             "tp1": 0.07246957167526552,
             "tp2": 0.07190922901547793,
-            "tp1_done": false
-        },
-        "AVAXUSDT": {
-            "direction": "LONG",
-            "entry": 6.406,
-            "initial_sl": 6.352708262704273,
-            "sl": 6.352708262704273,
-            "tp1": 6.4948195621595435,
-            "tp2": 6.565875211887178,
             "tp1_done": false
         },
         "LTCUSDT": {
@@ -63,6 +45,8 @@
     "live_orders": {},
     "cooldown": {
         "TONUSDT": true,
-        "HBARUSDT": true
+        "HBARUSDT": true,
+        "TRXUSDT": true,
+        "AVAXUSDT": true
     }
 }
