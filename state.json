@@ -44,7 +44,6 @@
     },
     "live_orders": {},
     "cooldown": {
-        "TONUSDT": true,
-        "ARBUSDT": true
+        "TONUSDT": true
     }
 }
