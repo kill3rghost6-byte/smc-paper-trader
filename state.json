@@ -32,15 +32,6 @@
             "tp2": 0.07190922901547793,
             "tp1_done": false
         },
-        "LTCUSDT": {
-            "direction": "SHORT",
-            "entry": 42.68,
-            "initial_sl": 42.794892598211625,
-            "sl": 42.68,
-            "tp1": 42.48851233631395,
-            "tp2": 42.33532220536512,
-            "tp1_done": true
-        },
         "HBARUSDT": {
             "direction": "LONG",
             "entry": 0.07094,
@@ -53,6 +44,7 @@
     },
     "live_orders": {},
     "cooldown": {
-        "TONUSDT": true
+        "TONUSDT": true,
+        "LTCUSDT": true
     }
 }
