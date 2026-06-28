@@ -1,5 +1,5 @@
 {
-    "balance": 7493.664771141581,
+    "balance": 7343.791475718749,
     "history_ids": [
         "DOGEUSDT_1782564300.0",
         "DOGEUSDT_1782560700.0"
@@ -22,15 +22,6 @@
             "tp1": 0.07246957167526552,
             "tp2": 0.07190922901547793,
             "tp1_done": false
-        },
-        "AAVEUSDT": {
-            "direction": "LONG",
-            "entry": 91.7,
-            "initial_sl": 91.07108067537557,
-            "sl": 91.07108067537557,
-            "tp1": 92.74819887437405,
-            "tp2": 93.58675797387329,
-            "tp1_done": false
         }
     },
     "live_orders": {},
@@ -39,6 +30,7 @@
         "TRXUSDT": true,
         "AVAXUSDT": true,
         "LTCUSDT": true,
-        "ARBUSDT": true
+        "ARBUSDT": true,
+        "AAVEUSDT": true
     }
 }
