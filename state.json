@@ -52,7 +52,5 @@
         }
     },
     "live_orders": {},
-    "cooldown": {
-        "ARBUSDT": true
-    }
+    "cooldown": {}
 }
