@@ -4,11 +4,10 @@
         "DOGEUSDT_1782564300.0",
         "DOGEUSDT_1782560700.0"
     ],
-    "live_positions": {},
-    "live_orders": {
+    "live_positions": {
         "BTCUSDT": {
             "direction": "SHORT",
-            "entry": 60145.100000000006,
+            "entry": 60144.90000000001,
             "initial_sl": 60361.31312726607,
             "sl": 60361.31312726607,
             "tp1": 59820.78030910091,
@@ -18,5 +17,6 @@
             "lock_swing_high": 60281.5,
             "lock_swing_low": 59775.0
         }
-    }
+    },
+    "live_orders": {}
 }
