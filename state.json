@@ -35,7 +35,6 @@
     },
     "live_orders": {},
     "cooldown": {
-        "HBARUSDT": true,
-        "AAVEUSDT": true
+        "HBARUSDT": true
     }
 }
