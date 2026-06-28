@@ -1,5 +1,5 @@
 {
-    "balance": 7343.791475718749,
+    "balance": 7196.915646204374,
     "history_ids": [
         "DOGEUSDT_1782564300.0",
         "DOGEUSDT_1782560700.0"
@@ -14,23 +14,22 @@
             "tp2": 58751.33574582477,
             "tp1_done": false
         },
-        "DOGEUSDT": {
-            "direction": "SHORT",
-            "entry": 0.07317,
-            "initial_sl": 0.07359025699484069,
-            "sl": 0.07359025699484069,
-            "tp1": 0.07246957167526552,
-            "tp2": 0.07190922901547793,
+        "TONUSDT": {
+            "direction": "LONG",
+            "entry": 1.602,
+            "initial_sl": 1.590878128849702,
+            "sl": 1.590878128849702,
+            "tp1": 1.6205364519171637,
+            "tp2": 1.6353656134508945,
             "tp1_done": false
         }
     },
     "live_orders": {},
     "cooldown": {
-        "HBARUSDT": true,
         "TRXUSDT": true,
-        "AVAXUSDT": true,
         "LTCUSDT": true,
         "ARBUSDT": true,
-        "AAVEUSDT": true
+        "AAVEUSDT": true,
+        "DOGEUSDT": true
     }
 }
