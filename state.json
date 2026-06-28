@@ -6,7 +6,5 @@
     ],
     "live_positions": {},
     "live_orders": {},
-    "cooldown": {
-        "BTCUSDT": true
-    }
+    "cooldown": {}
 }
