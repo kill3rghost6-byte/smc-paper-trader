@@ -52,7 +52,5 @@
         }
     },
     "live_orders": {},
-    "cooldown": {
-        "LTCUSDT": true
-    }
+    "cooldown": {}
 }
