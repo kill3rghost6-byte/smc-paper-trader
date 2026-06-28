@@ -36,8 +36,6 @@
     "live_orders": {},
     "cooldown": {
         "TRXUSDT": true,
-        "LTCUSDT": true,
-        "ARBUSDT": true,
-        "AAVEUSDT": true
+        "LTCUSDT": true
     }
 }
