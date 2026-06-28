@@ -1,22 +1,12 @@
 {
-    "balance": 9537.47,
+    "balance": 9271.374586999998,
     "history_ids": [
         "DOGEUSDT_1782564300.0",
         "DOGEUSDT_1782560700.0"
     ],
-    "live_positions": {
-        "BTCUSDT": {
-            "direction": "SHORT",
-            "entry": 60144.90000000001,
-            "initial_sl": 60361.31312726607,
-            "sl": 60361.31312726607,
-            "tp1": 59820.78030910091,
-            "tp2": 59280.247490935755,
-            "tp1_done": false,
-            "sl_moved_to_be": false,
-            "lock_swing_high": 60281.5,
-            "lock_swing_low": 59775.0
-        }
-    },
-    "live_orders": {}
+    "live_positions": {},
+    "live_orders": {},
+    "cooldown": {
+        "BTCUSDT": true
+    }
 }
