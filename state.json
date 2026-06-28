@@ -29,7 +29,6 @@
         "TRXUSDT": true,
         "LTCUSDT": true,
         "ARBUSDT": true,
-        "AAVEUSDT": true,
-        "DOGEUSDT": true
+        "AAVEUSDT": true
     }
 }
