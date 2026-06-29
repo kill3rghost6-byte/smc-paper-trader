@@ -3,7 +3,7 @@ name: SMC Live Bot
 on:
   schedule:
     # Runs every 5 hours to spawn a continuous 5.5 hour worker
-    # - cron: '0 */5 * * *' (DISABLED BY USER REQUEST)
+    - cron: '0 */5 * * *'
   workflow_dispatch:
 
 concurrency:
