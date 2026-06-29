@@ -389,6 +389,14 @@ def run_portfolio():
             elif trade_closed_this_run:
                 any_action = True
             
+            if 'positions' not in state_data:
+                state_data['positions'] = {}
+                
+            if state['position'] != 0 or state['limit_type'] != 0:
+                state_data['positions'][symbol] = {'active': True}
+            else:
+                state_data['positions'][symbol] = {'active': False}
+                
         except Exception as e:
             send_telegram(f"❌ Error processing {symbol}: {str(e)}")
             any_action = True
