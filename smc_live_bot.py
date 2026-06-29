@@ -401,7 +401,15 @@ def run_continuous():
                         state_data = json.load(f)
                     
                     bal = state_data.get('balance', 10000.0)
+                    positions = state_data.get('positions', {})
+                    active_pos = [sym for sym, pos in positions.items() if pos.get('active')]
+                    
                     msg = f"⏳ **SMC Status Update (15m)**\n💰 Balance: ${bal:,.2f}"
+                    if active_pos:
+                        msg += f"\n📂 Open Positions: {', '.join(active_pos)}"
+                    else:
+                        msg += "\n📂 No active positions."
+                        
                     send_telegram(msg)
                 
                 last_heartbeat_time = current_time
