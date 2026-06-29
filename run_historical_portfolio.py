@@ -61,11 +61,11 @@ def simulate_portfolio(all_trades, weights, initial_capital=10000):
     return equity, max_drawdown_pct, equity_curve
 
 if __name__ == '__main__':
-    # Default SMC Portfolio Weights
+    # Flat 5% Risk Portfolio (per user request)
     WEIGHTS_SMC = {
-        'BTCUSDT_30m': 0.0279,
-        'DOGEUSDT_15m': 0.0230,
-        'XRPUSDT_15m': 0.0238
+        'BTCUSDT_30m': 0.0500,
+        'DOGEUSDT_15m': 0.0500,
+        'TRXUSDT_30m': 0.0500
     }
 
     print("Fetching trades for SMC strategies...")

@@ -15,17 +15,16 @@ TELEGRAM_CHAT_ID = os.getenv("TELEGRAM_CHAT_ID", "5708853617")
 PAPER_TRADE_START = pd.to_datetime(os.getenv("PAPER_TRADE_START", datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")))
 
 def send_telegram(message, max_retries=3):
-    print(f"Telegram Log (Disabled): {message}")
-    return
-    # if TELEGRAM_BOT_TOKEN and TELEGRAM_CHAT_ID:
-    #     url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendMessage"
-    #     for attempt in range(max_retries):
-    #         try:
-    #             requests.post(url, json={"chat_id": TELEGRAM_CHAT_ID, "text": message}, timeout=10)
-    #             return
-    #         except Exception as e:
-    #             print(f"Telegram Error (Attempt {attempt+1}/{max_retries}): {e}")
-    #             time.sleep(3)
+    print(f"Telegram Log: {message}")
+    if TELEGRAM_BOT_TOKEN and TELEGRAM_CHAT_ID:
+        url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendMessage"
+        for attempt in range(max_retries):
+            try:
+                requests.post(url, json={"chat_id": TELEGRAM_CHAT_ID, "text": message}, timeout=10)
+                return
+            except Exception as e:
+                print(f"Telegram Error (Attempt {attempt+1}/{max_retries}): {e}")
+                time.sleep(3)
 
 def fetch_data(symbol, timeframe, limit=1000, max_retries=3):
     exchange = ccxt.binance()
@@ -302,11 +301,11 @@ def save_and_push_state(state_data, state_file='state.json'):
         print(f"Git Sync Error: {e}")
 
 def run_portfolio():
-    # Reverted back to the original SMC portfolio per user request
+    # Aggressive 5% Flat Risk Portfolio (per user request)
     portfolio = {
-        'BTCUSDT': {'tf': '30m', 'risk': 0.0279},
-        'DOGEUSDT': {'tf': '15m', 'risk': 0.0230},
-        'XRPUSDT': {'tf': '15m', 'risk': 0.0238}
+        'BTCUSDT': {'tf': '30m', 'risk': 0.0500},
+        'DOGEUSDT': {'tf': '15m', 'risk': 0.0500},
+        'TRXUSDT': {'tf': '30m', 'risk': 0.0500}
     }
     
     state_file = 'state.json'
