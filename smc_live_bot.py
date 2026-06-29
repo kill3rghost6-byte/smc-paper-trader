@@ -233,12 +233,21 @@ def get_live_state(df, tick_size, symbol):
                 hit_tp1 = h >= tp1 and not tp1_done
                 hit_tp2 = h >= tp2
                 
-                if hit_tp1: tp1_done = True
+                if hit_tp1: 
+                    tp1_done = True
+                    sl = entry_price # Move SL to breakeven immediately after TP1
                 
                 if hit_sl or hit_tp2:
                     exit_price = sl if hit_sl else tp2
                     risk_amount = entry_price - initial_sl_price
-                    r_multiple = (exit_price - entry_price) / risk_amount if risk_amount != 0 else 0
+                    r_exit = (exit_price - entry_price) / risk_amount if risk_amount != 0 else 0
+                    
+                    if tp1_done:
+                        r_tp1 = (tp1 - entry_price) / risk_amount if risk_amount != 0 else 0
+                        r_multiple = (0.75 * r_tp1) + (0.25 * r_exit)
+                    else:
+                        r_multiple = r_exit
+                        
                     completed_trades.append({
                         'id': f"{symbol}_{entry_time.timestamp()}",
                         'symbol': symbol,
@@ -256,12 +265,21 @@ def get_live_state(df, tick_size, symbol):
                 hit_tp1 = l <= tp1 and not tp1_done
                 hit_tp2 = l <= tp2
                 
-                if hit_tp1: tp1_done = True
+                if hit_tp1: 
+                    tp1_done = True
+                    sl = entry_price # Move SL to breakeven immediately after TP1
                 
                 if hit_sl or hit_tp2:
                     exit_price = sl if hit_sl else tp2
                     risk_amount = initial_sl_price - entry_price
-                    r_multiple = (entry_price - exit_price) / risk_amount if risk_amount != 0 else 0
+                    r_exit = (entry_price - exit_price) / risk_amount if risk_amount != 0 else 0
+                    
+                    if tp1_done:
+                        r_tp1 = (entry_price - tp1) / risk_amount if risk_amount != 0 else 0
+                        r_multiple = (0.75 * r_tp1) + (0.25 * r_exit)
+                    else:
+                        r_multiple = r_exit
+                        
                     completed_trades.append({
                         'id': f"{symbol}_{entry_time.timestamp()}",
                         'symbol': symbol,
@@ -276,10 +294,10 @@ def get_live_state(df, tick_size, symbol):
         'timestamp': df.index[-1],
         'position': position,
         'limit_type': limit_type,
-        'entry_price': limit_entry_price,
-        'sl': initial_sl_price,
-        'tp1': tp_2r_price,
-        'tp2': current_tp_price,
+        'entry_price': entry_price if position != 0 else limit_entry_price,
+        'sl': sl if position != 0 else initial_sl_price,
+        'tp1': tp1 if position != 0 else tp_2r_price,
+        'tp2': tp2 if position != 0 else current_tp_price,
         'sl_moved_to_be': sl == entry_price if position != 0 else False,
         'tp1_done': tp1_done,
         'completed_trades': completed_trades
