@@ -1,4 +1,15 @@
 {
     "balance": 10000.0,
-    "history_ids": []
+    "history_ids": [],
+    "positions": {
+        "BTCUSDT": {
+            "active": false
+        },
+        "DOGEUSDT": {
+            "active": false
+        },
+        "TRXUSDT": {
+            "active": false
+        }
+    }
 }
