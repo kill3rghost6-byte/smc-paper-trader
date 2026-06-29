@@ -27,7 +27,7 @@ def send_telegram(message, max_retries=3):
                 time.sleep(3)
 
 def fetch_data(symbol, timeframe, limit=1000, max_retries=3):
-    exchange = ccxt.binance()
+    exchange = ccxt.bybit()
     for attempt in range(max_retries):
         try:
             ohlcv = exchange.fetch_ohlcv(symbol, timeframe, limit=limit)
@@ -415,20 +415,21 @@ def run_continuous():
     start_time = time.time()
     max_duration = 5.5 * 3600 
     
-    last_heartbeat_time = 0
-    
     while time.time() - start_time < max_duration:
         try:
             run_portfolio()
             
             # 15-Minute Heartbeat Logic
             current_time = time.time()
-            if current_time - last_heartbeat_time >= 15 * 60:
-                state_file = 'state.json'
-                if os.path.exists(state_file):
-                    with open(state_file, 'r') as f:
-                        state_data = json.load(f)
-                    
+            state_file = 'state.json'
+            
+            if os.path.exists(state_file):
+                with open(state_file, 'r') as f:
+                    state_data = json.load(f)
+                
+                last_heartbeat_time = state_data.get('last_heartbeat_time', 0)
+                
+                if current_time - last_heartbeat_time >= 15 * 60:
                     bal = state_data.get('balance', 10000.0)
                     positions = state_data.get('positions', {})
                     active_pos = [sym for sym, pos in positions.items() if pos.get('active')]
@@ -440,11 +441,13 @@ def run_continuous():
                         msg += "\n📂 No active positions."
                         
                     send_telegram(msg)
-                
-                last_heartbeat_time = current_time
-                
+                    
+                    state_data['last_heartbeat_time'] = current_time
+                    with open(state_file, 'w') as f:
+                        json.dump(state_data, f, indent=4)
+                        
         except Exception as e:
-            print("Error in run_portfolio:", e)
+            print("Error in run_continuous logic:", e)
             
         now = datetime.datetime.utcnow()
         # Find next minute mark that is multiple of 15 (lowest timeframe in SMC is 15m)
