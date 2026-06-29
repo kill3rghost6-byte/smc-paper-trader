@@ -1,0 +1,428 @@
+run-bot	Set up job	﻿2026-06-27T18:28:03.4493423Z Current runner version: '2.335.1'
+run-bot	Set up job	2026-06-27T18:28:03.4554004Z ##[group]Runner Image Provisioner
+run-bot	Set up job	2026-06-27T18:28:03.4555795Z Hosted Compute Agent
+run-bot	Set up job	2026-06-27T18:28:03.4556926Z Version: 20260611.554
+run-bot	Set up job	2026-06-27T18:28:03.4558047Z Commit: 5e0782fdc9014723d3be820dd114dd31555c2bd1
+run-bot	Set up job	2026-06-27T18:28:03.4559665Z Build Date: 2026-06-11T21:40:46Z
+run-bot	Set up job	2026-06-27T18:28:03.4560993Z Worker ID: {3d5ed12f-040a-4ba1-b189-65681d42836d}
+run-bot	Set up job	2026-06-27T18:28:03.4562437Z Azure Region: northcentralus
+run-bot	Set up job	2026-06-27T18:28:03.4563687Z ##[endgroup]
+run-bot	Set up job	2026-06-27T18:28:03.4586862Z ##[group]Operating System
+run-bot	Set up job	2026-06-27T18:28:03.4587963Z Ubuntu
+run-bot	Set up job	2026-06-27T18:28:03.4588790Z 24.04.4
+run-bot	Set up job	2026-06-27T18:28:03.4589741Z LTS
+run-bot	Set up job	2026-06-27T18:28:03.4590640Z ##[endgroup]
+run-bot	Set up job	2026-06-27T18:28:03.4591693Z ##[group]Runner Image
+run-bot	Set up job	2026-06-27T18:28:03.4592714Z Image: ubuntu-24.04
+run-bot	Set up job	2026-06-27T18:28:03.4593633Z Version: 20260622.220.1
+run-bot	Set up job	2026-06-27T18:28:03.4596023Z Included Software: https://github.com/actions/runner-images/blob/ubuntu24/20260622.220/images/ubuntu/Ubuntu2404-Readme.md
+run-bot	Set up job	2026-06-27T18:28:03.4599163Z Image Release: https://github.com/actions/runner-images/releases/tag/ubuntu24%2F20260622.220
+run-bot	Set up job	2026-06-27T18:28:03.4600900Z ##[endgroup]
+run-bot	Set up job	2026-06-27T18:28:03.4602821Z ##[group]GITHUB_TOKEN Permissions
+run-bot	Set up job	2026-06-27T18:28:03.4616598Z Contents: write
+run-bot	Set up job	2026-06-27T18:28:03.4617697Z Metadata: read
+run-bot	Set up job	2026-06-27T18:28:03.4618662Z ##[endgroup]
+run-bot	Set up job	2026-06-27T18:28:03.4621906Z Secret source: Actions
+run-bot	Set up job	2026-06-27T18:28:03.4623605Z Prepare workflow directory
+run-bot	Set up job	2026-06-27T18:28:03.5371356Z Prepare all required actions
+run-bot	Set up job	2026-06-27T18:28:03.5428055Z Getting action download info
+run-bot	Set up job	2026-06-27T18:28:03.7579677Z Download action repository 'actions/checkout@v4' (SHA:34e114876b0b11c390a56381ad16ebd13914f8d5)
+run-bot	Set up job	2026-06-27T18:28:03.8366824Z Download action repository 'actions/setup-python@v5' (SHA:a26af69be951a213d495a4c3e4e4022e16d87065)
+run-bot	Set up job	2026-06-27T18:28:04.0317288Z Complete job name: run-bot
+run-bot	Checkout Repository	﻿2026-06-27T18:28:04.1010411Z Node 20 is being deprecated. This workflow is running with Node 24 by default. If you need to temporarily use Node 20, you can set the ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION=true environment variable. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/
+run-bot	Checkout Repository	2026-06-27T18:28:04.1019300Z ##[group]Run actions/checkout@v4
+run-bot	Checkout Repository	2026-06-27T18:28:04.1020128Z with:
+run-bot	Checkout Repository	2026-06-27T18:28:04.1020666Z   repository: behnialucas-droid/smc-paper-trader
+run-bot	Checkout Repository	2026-06-27T18:28:04.1025070Z   token: ***
+run-bot	Checkout Repository	2026-06-27T18:28:04.1025554Z   ssh-strict: true
+run-bot	Checkout Repository	2026-06-27T18:28:04.1026017Z   ssh-user: git
+run-bot	Checkout Repository	2026-06-27T18:28:04.1026491Z   persist-credentials: true
+run-bot	Checkout Repository	2026-06-27T18:28:04.1027008Z   clean: true
+run-bot	Checkout Repository	2026-06-27T18:28:04.1027479Z   sparse-checkout-cone-mode: true
+run-bot	Checkout Repository	2026-06-27T18:28:04.1028045Z   fetch-depth: 1
+run-bot	Checkout Repository	2026-06-27T18:28:04.1028503Z   fetch-tags: false
+run-bot	Checkout Repository	2026-06-27T18:28:04.1028977Z   show-progress: true
+run-bot	Checkout Repository	2026-06-27T18:28:04.1029447Z   lfs: false
+run-bot	Checkout Repository	2026-06-27T18:28:04.1029886Z   submodules: false
+run-bot	Checkout Repository	2026-06-27T18:28:04.1030402Z   set-safe-directory: true
+run-bot	Checkout Repository	2026-06-27T18:28:04.1031169Z ##[endgroup]
+run-bot	Checkout Repository	2026-06-27T18:28:04.2113598Z Syncing repository: behnialucas-droid/smc-paper-trader
+run-bot	Checkout Repository	2026-06-27T18:28:04.2117709Z ##[group]Getting Git version info
+run-bot	Checkout Repository	2026-06-27T18:28:04.2119143Z Working directory is '/home/runner/work/smc-paper-trader/smc-paper-trader'
+run-bot	Checkout Repository	2026-06-27T18:28:04.2121204Z [command]/usr/bin/git version
+run-bot	Checkout Repository	2026-06-27T18:28:04.2202776Z git version 2.54.0
+run-bot	Checkout Repository	2026-06-27T18:28:04.2226927Z ##[endgroup]
+run-bot	Checkout Repository	2026-06-27T18:28:04.2242303Z Temporarily overriding HOME='/home/runner/work/_temp/09f6fb0f-dca1-4d65-ac36-22c0e8c8ec09' before making global git config changes
+run-bot	Checkout Repository	2026-06-27T18:28:04.2245569Z Adding repository directory to the temporary git global config as a safe directory
+run-bot	Checkout Repository	2026-06-27T18:28:04.2249809Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/smc-paper-trader/smc-paper-trader
+run-bot	Checkout Repository	2026-06-27T18:28:04.2306204Z Deleting the contents of '/home/runner/work/smc-paper-trader/smc-paper-trader'
+run-bot	Checkout Repository	2026-06-27T18:28:04.2311000Z ##[group]Initializing the repository
+run-bot	Checkout Repository	2026-06-27T18:28:04.2316768Z [command]/usr/bin/git init /home/runner/work/smc-paper-trader/smc-paper-trader
+run-bot	Checkout Repository	2026-06-27T18:28:04.2427572Z hint: Using 'master' as the name for the initial branch. This default branch name
+run-bot	Checkout Repository	2026-06-27T18:28:04.2430298Z hint: will change to "main" in Git 3.0. To configure the initial branch name
+run-bot	Checkout Repository	2026-06-27T18:28:04.2431576Z hint: to use in all of your new repositories, which will suppress this warning,
+run-bot	Checkout Repository	2026-06-27T18:28:04.2436846Z hint: call:
+run-bot	Checkout Repository	2026-06-27T18:28:04.2437881Z hint:
+run-bot	Checkout Repository	2026-06-27T18:28:04.2439110Z hint: 	git config --global init.defaultBranch <name>
+run-bot	Checkout Repository	2026-06-27T18:28:04.2442150Z hint:
+run-bot	Checkout Repository	2026-06-27T18:28:04.2443555Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+run-bot	Checkout Repository	2026-06-27T18:28:04.2445705Z hint: 'development'. The just-created branch can be renamed via this command:
+run-bot	Checkout Repository	2026-06-27T18:28:04.2447324Z hint:
+run-bot	Checkout Repository	2026-06-27T18:28:04.2449456Z hint: 	git branch -m <name>
+run-bot	Checkout Repository	2026-06-27T18:28:04.2450603Z hint:
+run-bot	Checkout Repository	2026-06-27T18:28:04.2451937Z hint: Disable this message with "git config set advice.defaultBranchName false"
+run-bot	Checkout Repository	2026-06-27T18:28:04.2454093Z Initialized empty Git repository in /home/runner/work/smc-paper-trader/smc-paper-trader/.git/
+run-bot	Checkout Repository	2026-06-27T18:28:04.2458013Z [command]/usr/bin/git remote add origin https://github.com/behnialucas-droid/smc-paper-trader
+run-bot	Checkout Repository	2026-06-27T18:28:04.2495433Z ##[endgroup]
+run-bot	Checkout Repository	2026-06-27T18:28:04.2497052Z ##[group]Disabling automatic garbage collection
+run-bot	Checkout Repository	2026-06-27T18:28:04.2501247Z [command]/usr/bin/git config --local gc.auto 0
+run-bot	Checkout Repository	2026-06-27T18:28:04.2533516Z ##[endgroup]
+run-bot	Checkout Repository	2026-06-27T18:28:04.2535761Z ##[group]Setting up auth
+run-bot	Checkout Repository	2026-06-27T18:28:04.2541403Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+run-bot	Checkout Repository	2026-06-27T18:28:04.2578649Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+run-bot	Checkout Repository	2026-06-27T18:28:04.2936616Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+run-bot	Checkout Repository	2026-06-27T18:28:04.2969888Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+run-bot	Checkout Repository	2026-06-27T18:28:04.3201373Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+run-bot	Checkout Repository	2026-06-27T18:28:04.3235567Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+run-bot	Checkout Repository	2026-06-27T18:28:04.3467706Z [command]/usr/bin/git config --local http.https://github.com/.extraheader AUTHORIZATION: basic ***
+run-bot	Checkout Repository	2026-06-27T18:28:04.3502399Z ##[endgroup]
+run-bot	Checkout Repository	2026-06-27T18:28:04.3504178Z ##[group]Fetching the repository
+run-bot	Checkout Repository	2026-06-27T18:28:04.3513020Z [command]/usr/bin/git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin +10c1db2ed549e592e54090a02505f86d2fd420ca:refs/remotes/origin/master
+run-bot	Checkout Repository	2026-06-27T18:28:04.7724196Z From https://github.com/behnialucas-droid/smc-paper-trader
+run-bot	Checkout Repository	2026-06-27T18:28:04.7736593Z  * [new ref]         10c1db2ed549e592e54090a02505f86d2fd420ca -> origin/master
+run-bot	Checkout Repository	2026-06-27T18:28:04.7816624Z ##[endgroup]
+run-bot	Checkout Repository	2026-06-27T18:28:04.7818340Z ##[group]Determining the checkout info
+run-bot	Checkout Repository	2026-06-27T18:28:04.7820080Z ##[endgroup]
+run-bot	Checkout Repository	2026-06-27T18:28:04.7821189Z [command]/usr/bin/git sparse-checkout disable
+run-bot	Checkout Repository	2026-06-27T18:28:04.7874600Z [command]/usr/bin/git config --local --unset-all extensions.worktreeConfig
+run-bot	Checkout Repository	2026-06-27T18:28:04.7931050Z ##[group]Checking out the ref
+run-bot	Checkout Repository	2026-06-27T18:28:04.7932854Z [command]/usr/bin/git checkout --progress --force -B master refs/remotes/origin/master
+run-bot	Checkout Repository	2026-06-27T18:28:04.8287020Z Reset branch 'master'
+run-bot	Checkout Repository	2026-06-27T18:28:04.8294054Z branch 'master' set up to track 'origin/master'.
+run-bot	Checkout Repository	2026-06-27T18:28:04.8300230Z ##[endgroup]
+run-bot	Checkout Repository	2026-06-27T18:28:04.8340986Z [command]/usr/bin/git log -1 --format=%H
+run-bot	Checkout Repository	2026-06-27T18:28:04.8376751Z 10c1db2ed549e592e54090a02505f86d2fd420ca
+run-bot	Set up Python	﻿2026-06-27T18:28:04.8759339Z Node 20 is being deprecated. This workflow is running with Node 24 by default. If you need to temporarily use Node 20, you can set the ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION=true environment variable. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/
+run-bot	Set up Python	2026-06-27T18:28:04.8765740Z ##[group]Run actions/setup-python@v5
+run-bot	Set up Python	2026-06-27T18:28:04.8767059Z with:
+run-bot	Set up Python	2026-06-27T18:28:04.8768027Z   python-version: 3.10
+run-bot	Set up Python	2026-06-27T18:28:04.8769149Z   check-latest: false
+run-bot	Set up Python	2026-06-27T18:28:04.8780584Z   token: ***
+run-bot	Set up Python	2026-06-27T18:28:04.8781655Z   update-environment: true
+run-bot	Set up Python	2026-06-27T18:28:04.8782866Z   allow-prereleases: false
+run-bot	Set up Python	2026-06-27T18:28:04.8784037Z   freethreaded: false
+run-bot	Set up Python	2026-06-27T18:28:04.8785241Z ##[endgroup]
+run-bot	Set up Python	2026-06-27T18:28:05.0182905Z ##[group]Installed versions
+run-bot	Set up Python	2026-06-27T18:28:05.0288013Z (node:2046) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+run-bot	Set up Python	2026-06-27T18:28:05.0313041Z Successfully set up CPython (3.10.20)
+run-bot	Set up Python	2026-06-27T18:28:05.0327035Z (Use `node --trace-deprecation ...` to show where the warning was created)
+run-bot	Set up Python	2026-06-27T18:28:05.0331373Z ##[endgroup]
+run-bot	Install Dependencies	﻿2026-06-27T18:28:05.0501297Z ##[group]Run python -m pip install --upgrade pip
+run-bot	Install Dependencies	2026-06-27T18:28:05.0502994Z [36;1mpython -m pip install --upgrade pip[0m
+run-bot	Install Dependencies	2026-06-27T18:28:05.0504555Z [36;1mpip install pandas numpy ta ccxt requests[0m
+run-bot	Install Dependencies	2026-06-27T18:28:05.0682813Z shell: /usr/bin/bash -e {0}
+run-bot	Install Dependencies	2026-06-27T18:28:05.0683976Z env:
+run-bot	Install Dependencies	2026-06-27T18:28:05.0685492Z   pythonLocation: /opt/hostedtoolcache/Python/3.10.20/x64
+run-bot	Install Dependencies	2026-06-27T18:28:05.0687444Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.10.20/x64/lib/pkgconfig
+run-bot	Install Dependencies	2026-06-27T18:28:05.0689355Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.10.20/x64
+run-bot	Install Dependencies	2026-06-27T18:28:05.0691062Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.10.20/x64
+run-bot	Install Dependencies	2026-06-27T18:28:05.0692796Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.10.20/x64
+run-bot	Install Dependencies	2026-06-27T18:28:05.0694553Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.10.20/x64/lib
+run-bot	Install Dependencies	2026-06-27T18:28:05.0696161Z ##[endgroup]
+run-bot	Install Dependencies	2026-06-27T18:28:08.2520676Z Requirement already satisfied: pip in /opt/hostedtoolcache/Python/3.10.20/x64/lib/python3.10/site-packages (26.1.2)
+run-bot	Install Dependencies	2026-06-27T18:28:09.0889290Z Collecting pandas
+run-bot	Install Dependencies	2026-06-27T18:28:09.1433564Z   Downloading pandas-2.3.3-cp310-cp310-manylinux_2_24_x86_64.manylinux_2_28_x86_64.whl.metadata (91 kB)
+run-bot	Install Dependencies	2026-06-27T18:28:09.4222400Z Collecting numpy
+run-bot	Install Dependencies	2026-06-27T18:28:09.4269540Z   Downloading numpy-2.2.6-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (62 kB)
+run-bot	Install Dependencies	2026-06-27T18:28:09.4434430Z Collecting ta
+run-bot	Install Dependencies	2026-06-27T18:28:09.4484262Z   Downloading ta-0.11.0.tar.gz (25 kB)
+run-bot	Install Dependencies	2026-06-27T18:28:09.4557503Z   Installing build dependencies: started
+run-bot	Install Dependencies	2026-06-27T18:28:10.2693140Z   Installing build dependencies: finished with status 'done'
+run-bot	Install Dependencies	2026-06-27T18:28:10.2704406Z   Getting requirements to build wheel: started
+run-bot	Install Dependencies	2026-06-27T18:28:10.7116651Z   Getting requirements to build wheel: finished with status 'done'
+run-bot	Install Dependencies	2026-06-27T18:28:10.7125537Z   Preparing metadata (pyproject.toml): started
+run-bot	Install Dependencies	2026-06-27T18:28:10.9096581Z   Preparing metadata (pyproject.toml): finished with status 'done'
+run-bot	Install Dependencies	2026-06-27T18:28:11.1859253Z Collecting ccxt
+run-bot	Install Dependencies	2026-06-27T18:28:11.1907380Z   Downloading ccxt-4.5.61-py2.py3-none-any.whl.metadata (152 kB)
+run-bot	Install Dependencies	2026-06-27T18:28:11.2266428Z Collecting requests
+run-bot	Install Dependencies	2026-06-27T18:28:11.2324607Z   Downloading requests-2.34.2-py3-none-any.whl.metadata (4.8 kB)
+run-bot	Install Dependencies	2026-06-27T18:28:11.2506251Z Collecting python-dateutil>=2.8.2 (from pandas)
+run-bot	Install Dependencies	2026-06-27T18:28:11.2559103Z   Downloading python_dateutil-2.9.0.post0-py2.py3-none-any.whl.metadata (8.4 kB)
+run-bot	Install Dependencies	2026-06-27T18:28:11.2964171Z Collecting pytz>=2020.1 (from pandas)
+run-bot	Install Dependencies	2026-06-27T18:28:11.3008583Z   Downloading pytz-2026.2-py2.py3-none-any.whl.metadata (22 kB)
+run-bot	Install Dependencies	2026-06-27T18:28:11.3178779Z Collecting tzdata>=2022.7 (from pandas)
+run-bot	Install Dependencies	2026-06-27T18:28:11.3234597Z   Downloading tzdata-2026.2-py2.py3-none-any.whl.metadata (1.4 kB)
+run-bot	Install Dependencies	2026-06-27T18:28:11.3282346Z Requirement already satisfied: setuptools>=60.9.0 in /opt/hostedtoolcache/Python/3.10.20/x64/lib/python3.10/site-packages (from ccxt) (79.0.1)
+run-bot	Install Dependencies	2026-06-27T18:28:11.3463078Z Collecting certifi>=2018.1.18 (from ccxt)
+run-bot	Install Dependencies	2026-06-27T18:28:11.3506495Z   Downloading certifi-2026.6.17-py3-none-any.whl.metadata (2.5 kB)
+run-bot	Install Dependencies	2026-06-27T18:28:11.5728908Z Collecting cryptography>=2.6.1 (from ccxt)
+run-bot	Install Dependencies	2026-06-27T18:28:11.5780011Z   Downloading cryptography-49.0.0-cp39-abi3-manylinux_2_34_x86_64.whl.metadata (4.3 kB)
+run-bot	Install Dependencies	2026-06-27T18:28:11.5976227Z Collecting typing_extensions>=4.4.0 (from ccxt)
+run-bot	Install Dependencies	2026-06-27T18:28:11.6034754Z   Downloading typing_extensions-4.15.0-py3-none-any.whl.metadata (3.3 kB)
+run-bot	Install Dependencies	2026-06-27T18:28:12.2507007Z Collecting aiohttp>=3.10.11 (from ccxt)
+run-bot	Install Dependencies	2026-06-27T18:28:12.2551633Z   Downloading aiohttp-3.14.1-cp310-cp310-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl.metadata (8.3 kB)
+run-bot	Install Dependencies	2026-06-27T18:28:12.2720006Z Collecting aiodns>=1.1.1 (from ccxt)
+run-bot	Install Dependencies	2026-06-27T18:28:12.2760851Z   Downloading aiodns-4.0.4-py3-none-any.whl.metadata (9.0 kB)
+run-bot	Install Dependencies	2026-06-27T18:28:12.5718226Z Collecting yarl>=1.7.2 (from ccxt)
+run-bot	Install Dependencies	2026-06-27T18:28:12.5765844Z   Downloading yarl-1.24.2-cp310-cp310-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl.metadata (94 kB)
+run-bot	Install Dependencies	2026-06-27T18:28:12.6332237Z Collecting coincurve==21.0.0 (from ccxt)
+run-bot	Install Dependencies	2026-06-27T18:28:12.6378600Z   Downloading coincurve-21.0.0-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (4.0 kB)
+run-bot	Install Dependencies	2026-06-27T18:28:12.7699142Z Collecting charset_normalizer<4,>=2 (from requests)
+run-bot	Install Dependencies	2026-06-27T18:28:12.7744113Z   Downloading charset_normalizer-3.4.7-cp310-cp310-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl.metadata (40 kB)
+run-bot	Install Dependencies	2026-06-27T18:28:12.7909358Z Collecting idna<4,>=2.5 (from requests)
+run-bot	Install Dependencies	2026-06-27T18:28:12.7949307Z   Downloading idna-3.18-py3-none-any.whl.metadata (6.1 kB)
+run-bot	Install Dependencies	2026-06-27T18:28:12.8210816Z Collecting urllib3<3,>=1.26 (from requests)
+run-bot	Install Dependencies	2026-06-27T18:28:12.8253588Z   Downloading urllib3-2.7.0-py3-none-any.whl.metadata (6.9 kB)
+run-bot	Install Dependencies	2026-06-27T18:28:12.9188187Z Collecting pycares<6,>=5.0.0 (from aiodns>=1.1.1->ccxt)
+run-bot	Install Dependencies	2026-06-27T18:28:12.9235349Z   Downloading pycares-5.0.1-cp310-cp310-manylinux_2_26_x86_64.manylinux_2_28_x86_64.whl.metadata (4.1 kB)
+run-bot	Install Dependencies	2026-06-27T18:28:13.0376119Z Collecting cffi>=1.5.0 (from pycares<6,>=5.0.0->aiodns>=1.1.1->ccxt)
+run-bot	Install Dependencies	2026-06-27T18:28:13.0408487Z   Downloading cffi-2.0.0-cp310-cp310-manylinux2014_x86_64.manylinux_2_17_x86_64.whl.metadata (2.6 kB)
+run-bot	Install Dependencies	2026-06-27T18:28:13.0563339Z Collecting aiohappyeyeballs>=2.5.0 (from aiohttp>=3.10.11->ccxt)
+run-bot	Install Dependencies	2026-06-27T18:28:13.0603254Z   Downloading aiohappyeyeballs-2.6.2-py3-none-any.whl.metadata (5.9 kB)
+run-bot	Install Dependencies	2026-06-27T18:28:13.0727469Z Collecting aiosignal>=1.4.0 (from aiohttp>=3.10.11->ccxt)
+run-bot	Install Dependencies	2026-06-27T18:28:13.0765684Z   Downloading aiosignal-1.4.0-py3-none-any.whl.metadata (3.7 kB)
+run-bot	Install Dependencies	2026-06-27T18:28:13.0905274Z Collecting async-timeout<6.0,>=4.0 (from aiohttp>=3.10.11->ccxt)
+run-bot	Install Dependencies	2026-06-27T18:28:13.0956182Z   Downloading async_timeout-5.0.1-py3-none-any.whl.metadata (5.1 kB)
+run-bot	Install Dependencies	2026-06-27T18:28:13.1127607Z Collecting attrs>=17.3.0 (from aiohttp>=3.10.11->ccxt)
+run-bot	Install Dependencies	2026-06-27T18:28:13.1165459Z   Downloading attrs-26.1.0-py3-none-any.whl.metadata (8.8 kB)
+run-bot	Install Dependencies	2026-06-27T18:28:13.1929804Z Collecting frozenlist>=1.1.1 (from aiohttp>=3.10.11->ccxt)
+run-bot	Install Dependencies	2026-06-27T18:28:13.1978626Z   Downloading frozenlist-1.8.0-cp310-cp310-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl.metadata (20 kB)
+run-bot	Install Dependencies	2026-06-27T18:28:13.4900293Z Collecting multidict<7.0,>=4.5 (from aiohttp>=3.10.11->ccxt)
+run-bot	Install Dependencies	2026-06-27T18:28:13.4945960Z   Downloading multidict-6.7.1-cp310-cp310-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl.metadata (5.3 kB)
+run-bot	Install Dependencies	2026-06-27T18:28:13.5596072Z Collecting propcache>=0.2.0 (from aiohttp>=3.10.11->ccxt)
+run-bot	Install Dependencies	2026-06-27T18:28:13.5639593Z   Downloading propcache-0.5.2-cp310-cp310-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl.metadata (16 kB)
+run-bot	Install Dependencies	2026-06-27T18:28:13.6018689Z Collecting pycparser (from cffi>=1.5.0->pycares<6,>=5.0.0->aiodns>=1.1.1->ccxt)
+run-bot	Install Dependencies	2026-06-27T18:28:13.6058770Z   Downloading pycparser-3.0-py3-none-any.whl.metadata (8.2 kB)
+run-bot	Install Dependencies	2026-06-27T18:28:13.6251863Z Collecting six>=1.5 (from python-dateutil>=2.8.2->pandas)
+run-bot	Install Dependencies	2026-06-27T18:28:13.6302630Z   Downloading six-1.17.0-py2.py3-none-any.whl.metadata (1.7 kB)
+run-bot	Install Dependencies	2026-06-27T18:28:13.6493851Z Downloading pandas-2.3.3-cp310-cp310-manylinux_2_24_x86_64.manylinux_2_28_x86_64.whl (12.8 MB)
+run-bot	Install Dependencies	2026-06-27T18:28:13.7236785Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 12.8/12.8 MB 216.4 MB/s  0:00:00
+run-bot	Install Dependencies	2026-06-27T18:28:13.7286148Z Downloading numpy-2.2.6-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (16.8 MB)
+run-bot	Install Dependencies	2026-06-27T18:28:13.7964662Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 16.8/16.8 MB 257.3 MB/s  0:00:00
+run-bot	Install Dependencies	2026-06-27T18:28:13.8033467Z Downloading ccxt-4.5.61-py2.py3-none-any.whl (6.5 MB)
+run-bot	Install Dependencies	2026-06-27T18:28:13.8311707Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 6.5/6.5 MB 251.0 MB/s  0:00:00
+run-bot	Install Dependencies	2026-06-27T18:28:13.8363895Z Downloading coincurve-21.0.0-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (1.6 MB)
+run-bot	Install Dependencies	2026-06-27T18:28:13.8507310Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 1.6/1.6 MB 111.9 MB/s  0:00:00
+run-bot	Install Dependencies	2026-06-27T18:28:13.8549708Z Downloading requests-2.34.2-py3-none-any.whl (73 kB)
+run-bot	Install Dependencies	2026-06-27T18:28:13.8623116Z Downloading charset_normalizer-3.4.7-cp310-cp310-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (216 kB)
+run-bot	Install Dependencies	2026-06-27T18:28:13.8706259Z Downloading idna-3.18-py3-none-any.whl (65 kB)
+run-bot	Install Dependencies	2026-06-27T18:28:13.8771743Z Downloading urllib3-2.7.0-py3-none-any.whl (131 kB)
+run-bot	Install Dependencies	2026-06-27T18:28:13.8843998Z Downloading aiodns-4.0.4-py3-none-any.whl (12 kB)
+run-bot	Install Dependencies	2026-06-27T18:28:13.8904918Z Downloading pycares-5.0.1-cp310-cp310-manylinux_2_26_x86_64.manylinux_2_28_x86_64.whl (222 kB)
+run-bot	Install Dependencies	2026-06-27T18:28:13.8978268Z Downloading aiohttp-3.14.1-cp310-cp310-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (1.7 MB)
+run-bot	Install Dependencies	2026-06-27T18:28:13.9067204Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 1.7/1.7 MB 239.4 MB/s  0:00:00
+run-bot	Install Dependencies	2026-06-27T18:28:13.9105299Z Downloading async_timeout-5.0.1-py3-none-any.whl (6.2 kB)
+run-bot	Install Dependencies	2026-06-27T18:28:13.9167496Z Downloading multidict-6.7.1-cp310-cp310-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (243 kB)
+run-bot	Install Dependencies	2026-06-27T18:28:13.9231796Z Downloading yarl-1.24.2-cp310-cp310-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (106 kB)
+run-bot	Install Dependencies	2026-06-27T18:28:13.9300476Z Downloading aiohappyeyeballs-2.6.2-py3-none-any.whl (15 kB)
+run-bot	Install Dependencies	2026-06-27T18:28:13.9360528Z Downloading aiosignal-1.4.0-py3-none-any.whl (7.5 kB)
+run-bot	Install Dependencies	2026-06-27T18:28:13.9425871Z Downloading attrs-26.1.0-py3-none-any.whl (67 kB)
+run-bot	Install Dependencies	2026-06-27T18:28:13.9477497Z Downloading certifi-2026.6.17-py3-none-any.whl (133 kB)
+run-bot	Install Dependencies	2026-06-27T18:28:13.9539274Z Downloading cffi-2.0.0-cp310-cp310-manylinux2014_x86_64.manylinux_2_17_x86_64.whl (216 kB)
+run-bot	Install Dependencies	2026-06-27T18:28:13.9602760Z Downloading cryptography-49.0.0-cp39-abi3-manylinux_2_34_x86_64.whl (4.7 MB)
+run-bot	Install Dependencies	2026-06-27T18:28:13.9797762Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 4.7/4.7 MB 274.3 MB/s  0:00:00
+run-bot	Install Dependencies	2026-06-27T18:28:13.9838503Z Downloading frozenlist-1.8.0-cp310-cp310-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl (219 kB)
+run-bot	Install Dependencies	2026-06-27T18:28:13.9903356Z Downloading propcache-0.5.2-cp310-cp310-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (60 kB)
+run-bot	Install Dependencies	2026-06-27T18:28:13.9964646Z Downloading python_dateutil-2.9.0.post0-py2.py3-none-any.whl (229 kB)
+run-bot	Install Dependencies	2026-06-27T18:28:14.0031715Z Downloading pytz-2026.2-py2.py3-none-any.whl (510 kB)
+run-bot	Install Dependencies	2026-06-27T18:28:14.0119650Z Downloading six-1.17.0-py2.py3-none-any.whl (11 kB)
+run-bot	Install Dependencies	2026-06-27T18:28:14.0179468Z Downloading typing_extensions-4.15.0-py3-none-any.whl (44 kB)
+run-bot	Install Dependencies	2026-06-27T18:28:14.0289572Z Downloading tzdata-2026.2-py2.py3-none-any.whl (349 kB)
+run-bot	Install Dependencies	2026-06-27T18:28:14.0357525Z Downloading pycparser-3.0-py3-none-any.whl (48 kB)
+run-bot	Install Dependencies	2026-06-27T18:28:14.1218803Z Building wheels for collected packages: ta
+run-bot	Install Dependencies	2026-06-27T18:28:14.1229541Z   Building wheel for ta (pyproject.toml): started
+run-bot	Install Dependencies	2026-06-27T18:28:14.3323623Z   Building wheel for ta (pyproject.toml): finished with status 'done'
+run-bot	Install Dependencies	2026-06-27T18:28:14.3330941Z   Created wheel for ta: filename=ta-0.11.0-py3-none-any.whl size=29481 sha256=87a0b0426fe0c5d422e470d7edbc9d8c5e4227a5d7ac9e215545d37d1c5c583a
+run-bot	Install Dependencies	2026-06-27T18:28:14.3333221Z   Stored in directory: /home/runner/.cache/pip/wheels/5f/67/4f/8a9f252836e053e532c6587a3230bc72a4deb16b03a829610b
+run-bot	Install Dependencies	2026-06-27T18:28:14.3349167Z Successfully built ta
+run-bot	Install Dependencies	2026-06-27T18:28:14.4282691Z Installing collected packages: pytz, urllib3, tzdata, typing_extensions, six, pycparser, propcache, numpy, idna, frozenlist, coincurve, charset_normalizer, certifi, attrs, async-timeout, aiohappyeyeballs, requests, python-dateutil, multidict, cffi, aiosignal, yarl, pycares, pandas, cryptography, ta, aiohttp, aiodns, ccxt
+run-bot	Install Dependencies	2026-06-27T18:28:24.8463790Z 
+run-bot	Install Dependencies	2026-06-27T18:28:24.8511150Z Successfully installed aiodns-4.0.4 aiohappyeyeballs-2.6.2 aiohttp-3.14.1 aiosignal-1.4.0 async-timeout-5.0.1 attrs-26.1.0 ccxt-4.5.61 certifi-2026.6.17 cffi-2.0.0 charset_normalizer-3.4.7 coincurve-21.0.0 cryptography-49.0.0 frozenlist-1.8.0 idna-3.18 multidict-6.7.1 numpy-2.2.6 pandas-2.3.3 propcache-0.5.2 pycares-5.0.1 pycparser-3.0 python-dateutil-2.9.0.post0 pytz-2026.2 requests-2.34.2 six-1.17.0 ta-0.11.0 typing_extensions-4.15.0 tzdata-2026.2 urllib3-2.7.0 yarl-1.24.2
+run-bot	Run Live Bot in Continuous Mode	﻿2026-06-27T18:28:24.9910908Z ##[group]Run git config --global user.name 'SMC Bot'
+run-bot	Run Live Bot in Continuous Mode	2026-06-27T18:28:24.9911345Z [36;1mgit config --global user.name 'SMC Bot'[0m
+run-bot	Run Live Bot in Continuous Mode	2026-06-27T18:28:24.9911765Z [36;1mgit config --global user.email 'smc-bot@users.noreply.github.com'[0m
+run-bot	Run Live Bot in Continuous Mode	2026-06-27T18:28:24.9912147Z [36;1m[0m
+run-bot	Run Live Bot in Continuous Mode	2026-06-27T18:28:24.9912432Z [36;1m# Background job to commit state.json periodically if changed[0m
+run-bot	Run Live Bot in Continuous Mode	2026-06-27T18:28:24.9912796Z [36;1mwhile true; do[0m
+run-bot	Run Live Bot in Continuous Mode	2026-06-27T18:28:24.9913028Z [36;1m  sleep 120[0m
+run-bot	Run Live Bot in Continuous Mode	2026-06-27T18:28:24.9913258Z [36;1m  git add state.json || true[0m
+run-bot	Run Live Bot in Continuous Mode	2026-06-27T18:28:24.9913822Z [36;1m  git diff --quiet && git diff --staged --quiet || (git commit -m "Update paper trading state" && git pull --rebase && git push)[0m
+run-bot	Run Live Bot in Continuous Mode	2026-06-27T18:28:24.9914384Z [36;1mdone &[0m
+run-bot	Run Live Bot in Continuous Mode	2026-06-27T18:28:24.9914588Z [36;1m[0m
+run-bot	Run Live Bot in Continuous Mode	2026-06-27T18:28:24.9915189Z [36;1mpython smc_live_bot.py --continuous[0m
+run-bot	Run Live Bot in Continuous Mode	2026-06-27T18:28:24.9948501Z shell: /usr/bin/bash -e {0}
+run-bot	Run Live Bot in Continuous Mode	2026-06-27T18:28:24.9948760Z env:
+run-bot	Run Live Bot in Continuous Mode	2026-06-27T18:28:24.9949039Z   pythonLocation: /opt/hostedtoolcache/Python/3.10.20/x64
+run-bot	Run Live Bot in Continuous Mode	2026-06-27T18:28:24.9949541Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.10.20/x64/lib/pkgconfig
+run-bot	Run Live Bot in Continuous Mode	2026-06-27T18:28:24.9949984Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.10.20/x64
+run-bot	Run Live Bot in Continuous Mode	2026-06-27T18:28:24.9950375Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.10.20/x64
+run-bot	Run Live Bot in Continuous Mode	2026-06-27T18:28:24.9950754Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.10.20/x64
+run-bot	Run Live Bot in Continuous Mode	2026-06-27T18:28:24.9951137Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.10.20/x64/lib
+run-bot	Run Live Bot in Continuous Mode	2026-06-27T18:28:24.9951701Z   TELEGRAM_BOT_TOKEN: ***
+run-bot	Run Live Bot in Continuous Mode	2026-06-27T18:28:24.9951960Z   TELEGRAM_CHAT_ID: ***
+run-bot	Run Live Bot in Continuous Mode	2026-06-27T18:28:24.9952195Z   PAPER_TRADE_START: 2026-06-27 00:00:00
+run-bot	Run Live Bot in Continuous Mode	2026-06-27T18:28:24.9952461Z ##[endgroup]
+run-bot	Run Live Bot in Continuous Mode	2026-06-27T18:46:04.0208459Z 🚀 **SMC Bot switched to Continuous Mode (100% Precision)** 🚀
+run-bot	Run Live Bot in Continuous Mode	2026-06-27T18:46:04.0209557Z It will now run flawlessly without GitHub cron delays.
+run-bot	Run Live Bot in Continuous Mode	2026-06-27T18:46:04.0210574Z ✅ **SMC Scan Complete** | Balance: $9770.00
+run-bot	Run Live Bot in Continuous Mode	2026-06-27T18:46:04.0211357Z No active setups or positions right now.
+run-bot	Run Live Bot in Continuous Mode	2026-06-27T18:46:04.0212198Z Sleeping for 146.081975 seconds until 2026-06-27 18:31:00 UTC...
+run-bot	Run Live Bot in Continuous Mode	2026-06-27T18:46:04.0213785Z ❌ Error processing XRPUSDT: lbank GET https://api.lbank.info/v2/withdrawConfigs.do 429 Too Many Requests <!doctype html>
+run-bot	Run Live Bot in Continuous Mode	2026-06-27T18:46:04.0215478Z <!--[if lt IE 7]> <html class="no-js ie6 oldie" lang="en-US"> <![endif]-->
+run-bot	Run Live Bot in Continuous Mode	2026-06-27T18:46:04.0216451Z <!--[if IE 7]>    <html class="no-js ie7 oldie" lang="en-US"> <![endif]-->
+run-bot	Run Live Bot in Continuous Mode	2026-06-27T18:46:04.0217420Z <!--[if IE 8]>    <html class="no-js ie8 oldie" lang="en-US"> <![endif]-->
+run-bot	Run Live Bot in Continuous Mode	2026-06-27T18:46:04.0218248Z <!--[if gt IE 8]><!-->
+run-bot	Run Live Bot in Continuous Mode	2026-06-27T18:46:04.0218820Z <html class="no-js" lang="en-US">
+run-bot	Run Live Bot in Continuous Mode	2026-06-27T18:46:04.0219432Z     <!--<![endif]-->
+run-bot	Run Live Bot in Continuous Mode	2026-06-27T18:46:04.0220623Z     <head>
+run-bot	Run Live Bot in Continuous Mode	2026-06-27T18:46:04.0221817Z         <title>Access denied | api.lbank.info used Cloudflare to restrict access | api.lbank.info | Cloudflare</title>
+run-bot	Run Live Bot in Continuous Mode	2026-06-27T18:46:04.0223778Z         <meta charset="UTF-8" />
+run-bot	Run Live Bot in Continuous Mode	2026-06-27T18:46:04.0224304Z <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+run-bot	Run Live Bot in Continuous Mode	2026-06-27T18:46:04.0225223Z <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+run-bot	Run Live Bot in Continuous Mode	2026-06-27T18:46:04.0225958Z <meta name="robots" content="noindex, nofollow" />
+run-bot	Run Live Bot in Continuous Mode	2026-06-27T18:46:04.0226524Z <meta name="viewport" content="width=device-width,initial-scale=1" />
+run-bot	Run Live Bot in Continuous Mode	2026-06-27T18:46:04.0227133Z <link rel="stylesheet" id="cf_styles-css" href="/cdn-cgi/styles/main.css" /> <script>
+run-bot	Run Live Bot in Continuous Mode	2026-06-27T18:46:04.0229305Z   (function(){if(document.addEventListener&&window.XMLHttpRequest&&JSON&&JSON.stringify){var e=function(a){var c=document.getElementById("error-feedback-survey"),d=document.getElementById("error-feedback-success"),b=new XMLHttpRequest;a={event:"feedback clicked",properties:{errorCode: 1015 },helpful:a,version: 1 };b.open("POST","https://sparrow.cloudflare.com/api/v1/event");b.setRequestHeader("Content-Type","application/json");b.setRequestHeader("Sparrow-Source-Key","c771f0e4b54944bebf4261d44bd79a1e");
+run-bot	Run Live Bot in Continuous Mode	2026-06-27T18:46:04.0232839Z b.send(JSON.stringify(a));c.classList.add("feedback-hidden");d.classList.remove("feedback-hidden")};document.addEventListener("DOMContentLoaded",function(){var a=document.getElementById("error-feedback"),c=document.getElementById("feedback-button-yes"),d=document.getElementById("feedback-button-no");"classList"in a&&(a.classList.remove("feedback-hidden"),c.addEventListener("click",function(){e(!0)}),d.addEventListener("click",function(){e(!1)}))})}})();
+run-bot	Run Live Bot in Continuous Mode	2026-06-27T18:46:04.0235311Z </script>
+run-bot	Run Live Bot in Continuous Mode	2026-06-27T18:46:04.0235767Z         <script
+run-bot	Run Live Bot in Continuous Mode	2026-06-27T18:46:04.0236103Z             defer
+run-bot	Run Live Bot in Continuous Mode	2026-06-27T18:46:04.0236601Z             src="https://performance.radar.cloudflare.com/beacon.js"
+run-bot	Run Live Bot in Continuous Mode	2026-06-27T18:46:04.0237221Z         ></script>
+run-bot	Run Live Bot in Continuous Mode	2026-06-27T18:46:04.0237567Z     </head>
+run-bot	Run Live Bot in Continuous Mode	2026-06-27T18:46:04.0237863Z     <body>
+run-bot	Run Live Bot in Continuous Mode	2026-06-27T18:46:04.0238178Z         <div id="cf-wrapper">
+run-bot	Run Live Bot in Continuous Mode	2026-06-27T18:46:04.0238557Z             <div
+run-bot	Run Live Bot in Continuous Mode	2026-06-27T18:46:04.0238991Z                 class="cf-alert cf-alert-error cf-cookie-error hidden"
+run-bot	Run Live Bot in Continuous Mode	2026-06-27T18:46:04.0239576Z                 id="cookie-alert"
+run-bot	Run Live Bot in Continuous Mode	2026-06-27T18:46:04.0240012Z                 data-translate="enable_cookies"
+run-bot	Run Live Bot in Continuous Mode	2026-06-27T18:46:04.0240448Z             >
+run-bot	Run Live Bot in Continuous Mode	2026-06-27T18:46:04.0240787Z                 Please enable cookies.
+run-bot	Run Live Bot in Continuous Mode	2026-06-27T18:46:04.0241189Z             </div>
+run-bot	Run Live Bot in Continuous Mode	2026-06-27T18:46:04.0241581Z             <div id="cf-error-details" class="p-0">
+run-bot	Run Live Bot in Continuous Mode	2026-06-27T18:46:04.0242094Z                 <header
+run-bot	Run Live Bot in Continuous Mode	2026-06-27T18:46:04.0242697Z                     class="mx-auto pt-10 lg:pt-6 lg:px-8 w-240 lg:w-full mb-15 antialiased"
+run-bot	Run Live Bot in Continuous Mode	2026-06-27T18:46:04.0243395Z                 >
+run-bot	Run Live Bot in Continuous Mode	2026-06-27T18:46:04.0243745Z                     <h1
+run-bot	Run Live Bot in Continuous Mode	2026-06-27T18:46:04.0244547Z                         class="inline-block md:block mr-2 md:mb-2 font-light text-60 md:text-3xl text-black-dark leading-tight"
+run-bot	Run Live Bot in Continuous Mode	2026-06-27T18:46:04.0245714Z                     >
+run-bot	Run Live Bot in Continuous Mode	2026-06-27T18:46:04.0246225Z                         <span data-translate="error">Error</span>
+run-bot	Run Live Bot in Continuous Mode	2026-06-27T18:46:04.0246857Z                         <span>1015</span>
+run-bot	Run Live Bot in Continuous Mode	2026-06-27T18:46:04.0247354Z                     </h1>
+run-bot	Run Live Bot in Continuous Mode	2026-06-27T18:46:04.0247730Z                     <span
+run-bot	Run Live Bot in Continuous Mode	2026-06-27T18:46:04.0248331Z                         class="inline-block md:block heading-ray-id font-mono text-15 lg:text-sm lg:leading-relaxed"
+run-bot	Run Live Bot in Continuous Mode	2026-06-27T18:46:04.0248862Z                         >Ray ID: a12686c9393d22c8 &bull;</span
+run-bot	Run Live Bot in Continuous Mode	2026-06-27T18:46:04.0249151Z                     >
+run-bot	Run Live Bot in Continuous Mode	2026-06-27T18:46:04.0249355Z                     <span
+run-bot	Run Live Bot in Continuous Mode	2026-06-27T18:46:04.0249776Z                         class="inline-block md:block heading-ray-id font-mono text-15 lg:text-sm lg:leading-relaxed"
+run-bot	Run Live Bot in Continuous Mode	2026-06-27T18:46:04.0250259Z                         >2026-06-27 18:31:03 UTC</span
+run-bot	Run Live Bot in Continuous Mode	2026-06-27T18:46:04.0250885Z                     >
+run-bot	Run Live Bot in Continuous Mode	2026-06-27T18:46:04.0251127Z                     <h2
+run-bot	Run Live Bot in Continuous Mode	2026-06-27T18:46:04.0251450Z                         class="text-gray-600 leading-1.3 text-3xl lg:text-2xl font-light"
+run-bot	Run Live Bot in Continuous Mode	2026-06-27T18:46:04.0252061Z                     >
+run-bot	Run Live Bot in Continuous Mode	2026-06-27T18:46:04.0252292Z                         You are being rate limited
+run-bot	Run Live Bot in Continuous Mode	2026-06-27T18:46:04.0252574Z                     </h2>
+run-bot	Run Live Bot in Continuous Mode	2026-06-27T18:46:04.0252789Z                 </header>
+run-bot	Run Live Bot in Continuous Mode	2026-06-27T18:46:04.0252994Z                 
+run-bot	Run Live Bot in Continuous Mode	2026-06-27T18:46:04.0253187Z                 
+run-bot	Run Live Bot in Continuous Mode	2026-06-27T18:46:04.0253449Z                 <section class="w-240 lg:w-full mx-auto mb-8 lg:px-8">
+run-bot	Run Live Bot in Continuous Mode	2026-06-27T18:46:04.0253853Z                     <div id="what-happened-section" class="w-1/2 md:w-full">
+run-bot	Run Live Bot in Continuous Mode	2026-06-27T18:46:04.0254210Z                         <h2
+run-bot	Run Live Bot in Continuous Mode	2026-06-27T18:46:04.0254664Z                             class="text-3xl leading-tight font-normal mb-4 text-black-dark antialiased"
+run-bot	Run Live Bot in Continuous Mode	2026-06-27T18:46:04.0255421Z                             data-translate="what_happened"
+run-bot	Run Live Bot in Continuous Mode	2026-06-27T18:46:04.0255712Z                         >
+run-bot	Run Live Bot in Continuous Mode	2026-06-27T18:46:04.0255948Z                             What happened?
+run-bot	Run Live Bot in Continuous Mode	2026-06-27T18:46:04.0256205Z                         </h2>
+run-bot	Run Live Bot in Continuous Mode	2026-06-27T18:46:04.0256438Z                         
+run-bot	Run Live Bot in Continuous Mode	2026-06-27T18:46:04.0256890Z                             <p>The owner of this website (api.lbank.info) has banned you temporarily from accessing this website.</p>
+run-bot	Run Live Bot in Continuous Mode	2026-06-27T18:46:04.0257557Z                         
+run-bot	Run Live Bot in Continuous Mode	2026-06-27T18:46:04.0257765Z                         
+run-bot	Run Live Bot in Continuous Mode	2026-06-27T18:46:04.0257971Z                         <p>
+run-bot	Run Live Bot in Continuous Mode	2026-06-27T18:46:04.0258200Z                             Please see
+run-bot	Run Live Bot in Continuous Mode	2026-06-27T18:46:04.0258452Z                             <a
+run-bot	Run Live Bot in Continuous Mode	2026-06-27T18:46:04.0258710Z                                 rel="noopener noreferrer"
+run-bot	Run Live Bot in Continuous Mode	2026-06-27T18:46:04.0259347Z                                 href="https://developers.cloudflare.com/support/troubleshooting/http-status-codes/cloudflare-1xxx-errors/error-1015/"
+run-bot	Run Live Bot in Continuous Mode	2026-06-27T18:46:04.0259967Z                                 target="_blank"
+run-bot	Run Live Bot in Continuous Mode	2026-06-27T18:46:04.0260545Z                                 >https://developers.cloudflare.com/support/troubleshooting/http-status-codes/cloudflare-1xxx-errors/error-1015/</a
+run-bot	Run Live Bot in Continuous Mode	2026-06-27T18:46:04.0261130Z                             >
+run-bot	Run Live Bot in Continuous Mode	2026-06-27T18:46:04.0261386Z                             for more details.
+run-bot	Run Live Bot in Continuous Mode	2026-06-27T18:46:04.0261657Z                         </p>
+run-bot	Run Live Bot in Continuous Mode	2026-06-27T18:46:04.0261882Z                         
+run-bot	Run Live Bot in Continuous Mode	2026-06-27T18:46:04.0262088Z                     </div>
+run-bot	Run Live Bot in Continuous Mode	2026-06-27T18:46:04.0262227Z 
+run-bot	Run Live Bot in Continuous Mode	2026-06-27T18:46:04.0262309Z                     
+run-bot	Run Live Bot in Continuous Mode	2026-06-27T18:46:04.0262509Z                 </section>
+run-bot	Run Live Bot in Continuous Mode	2026-06-27T18:46:04.0262716Z                 
+run-bot	Run Live Bot in Continuous Mode	2026-06-27T18:46:04.0262830Z 
+run-bot	Run Live Bot in Continuous Mode	2026-06-27T18:46:04.0263021Z                 <div class="feedback-hidden py-8 text-center" id="error-feedback">
+run-bot	Run Live Bot in Continuous Mode	2026-06-27T18:46:04.0263476Z     <div id="error-feedback-survey" class="footer-line-wrapper">
+run-bot	Run Live Bot in Continuous Mode	2026-06-27T18:46:04.0263822Z         Was this page helpful?
+run-bot	Run Live Bot in Continuous Mode	2026-06-27T18:46:04.0264047Z         <button
+run-bot	Run Live Bot in Continuous Mode	2026-06-27T18:46:04.0264403Z             class="border border-solid bg-white cf-button cursor-pointer ml-4 px-4 py-2 rounded"
+run-bot	Run Live Bot in Continuous Mode	2026-06-27T18:46:04.0265173Z             id="feedback-button-yes"
+run-bot	Run Live Bot in Continuous Mode	2026-06-27T18:46:04.0265458Z             type="button"
+run-bot	Run Live Bot in Continuous Mode	2026-06-27T18:46:04.0265674Z         >
+run-bot	Run Live Bot in Continuous Mode	2026-06-27T18:46:04.0265846Z             Yes
+run-bot	Run Live Bot in Continuous Mode	2026-06-27T18:46:04.0266037Z         </button>
+run-bot	Run Live Bot in Continuous Mode	2026-06-27T18:46:04.0266224Z         <button
+run-bot	Run Live Bot in Continuous Mode	2026-06-27T18:46:04.0266575Z             class="border border-solid bg-white cf-button cursor-pointer ml-4 px-4 py-2 rounded"
+run-bot	Run Live Bot in Continuous Mode	2026-06-27T18:46:04.0267018Z             id="feedback-button-no"
+run-bot	Run Live Bot in Continuous Mode	2026-06-27T18:46:04.0267266Z             type="button"
+run-bot	Run Live Bot in Continuous Mode	2026-06-27T18:46:04.0267469Z         >
+run-bot	Run Live Bot in Continuous Mode	2026-06-27T18:46:04.0267639Z             No
+run-bot	Run Live Bot in Continuous Mode	2026-06-27T18:46:04.0267933Z         </button>
+run-bot	Run Live Bot in Continuous Mode	2026-06-27T18:46:04.0285352Z     </div>
+run-bot	Run Live Bot in Continuous Mode	2026-06-27T18:46:04.0285938Z     <div class="feedback-success feedback-hidden" id="error-feedback-success">
+run-bot	Run Live Bot in Continuous Mode	2026-06-27T18:46:04.0286674Z         Thank you for your feedback!
+run-bot	Run Live Bot in Continuous Mode	2026-06-27T18:46:04.0287120Z     </div>
+run-bot	Run Live Bot in Continuous Mode	2026-06-27T18:46:04.0287791Z </div> <div class="cf-error-footer cf-wrapper w-240 lg:w-full py-10 sm:py-4 sm:px-8 mx-auto text-center sm:text-left border-solid border-0 border-t border-gray-300">
+run-bot	Run Live Bot in Continuous Mode	2026-06-27T18:46:04.0288703Z     <p class="text-13">
+run-bot	Run Live Bot in Continuous Mode	2026-06-27T18:46:04.0289231Z       <span class="cf-footer-item sm:block sm:mb-1">Cloudflare Ray ID: <strong class="font-semibold">a12686c9393d22c8</strong></span>
+run-bot	Run Live Bot in Continuous Mode	2026-06-27T18:46:04.0289864Z       <span class="cf-footer-separator sm:hidden">&bull;</span>
+run-bot	Run Live Bot in Continuous Mode	2026-06-27T18:46:04.0290326Z       <span id="cf-footer-item-ip" class="cf-footer-item hidden sm:block sm:mb-1">
+run-bot	Run Live Bot in Continuous Mode	2026-06-27T18:46:04.0290716Z         Your IP:
+run-bot	Run Live Bot in Continuous Mode	2026-06-27T18:46:04.0291138Z         <button type="button" id="cf-footer-ip-reveal" class="cf-footer-ip-reveal-btn">Click to reveal</button>
+run-bot	Run Live Bot in Continuous Mode	2026-06-27T18:46:04.0291690Z         <span class="hidden" id="cf-footer-ip">64.236.169.1</span>
+run-bot	Run Live Bot in Continuous Mode	2026-06-27T18:46:04.0292083Z         <span class="cf-footer-separator sm:hidden">&bull;</span>
+run-bot	Run Live Bot in Continuous Mode	2026-06-27T18:46:04.0292419Z       </span>
+run-bot	Run Live Bot in Continuous Mode	2026-06-27T18:46:04.0293255Z       <span class="cf-footer-item sm:block sm:mb-1"><span>Performance &amp; security by</span> <a rel="noopener noreferrer" href="https://www.cloudflare.com/5xx-error-landing" id="brand_link" target="_blank">Cloudflare</a></span>
+run-bot	Run Live Bot in Continuous Mode	2026-06-27T18:46:04.0294141Z       
+run-bot	Run Live Bot in Continuous Mode	2026-06-27T18:46:04.0294453Z     </p>
+run-bot	Run Live Bot in Continuous Mode	2026-06-27T18:46:04.0296029Z     <script>(function(){function d(){var b=a.getElementById("cf-footer-item-ip"),c=a.getElementById("cf-footer-ip-reveal");b&&"classList"in b&&(b.classList.remove("hidden"),c.addEventListener("click",function(){c.classList.add("hidden");a.getElementById("cf-footer-ip").classList.remove("hidden")}))}var a=document;document.addEventListener&&a.addEventListener("DOMContentLoaded",d)})();</script>
+run-bot	Run Live Bot in Continuous Mode	2026-06-27T18:46:04.0297495Z   </div><!-- /.error-footer -->
+run-bot	Run Live Bot in Continuous Mode	2026-06-27T18:46:04.0297745Z             </div>
+run-bot	Run Live Bot in Continuous Mode	2026-06-27T18:46:04.0297971Z             <!-- /#cf-error-details -->
+run-bot	Run Live Bot in Continuous Mode	2026-06-27T18:46:04.0298227Z         </div>
+run-bot	Run Live Bot in Continuous Mode	2026-06-27T18:46:04.0298433Z         <!-- /#cf-wrapper -->
+run-bot	Run Live Bot in Continuous Mode	2026-06-27T18:46:04.0298595Z 
+run-bot	Run Live Bot in Continuous Mode	2026-06-27T18:46:04.0298676Z          <script>
+run-bot	Run Live Bot in Continuous Mode	2026-06-27T18:46:04.0298897Z     window._cf_translation = {};
+run-bot	Run Live Bot in Continuous Mode	2026-06-27T18:46:04.0299148Z     
+run-bot	Run Live Bot in Continuous Mode	2026-06-27T18:46:04.0299315Z     
+run-bot	Run Live Bot in Continuous Mode	2026-06-27T18:46:04.0299488Z   </script> 
+run-bot	Run Live Bot in Continuous Mode	2026-06-27T18:46:04.0299670Z         
+run-bot	Run Live Bot in Continuous Mode	2026-06-27T18:46:04.0299851Z     </body>
+run-bot	Run Live Bot in Continuous Mode	2026-06-27T18:46:04.0300037Z </html>
+run-bot	Run Live Bot in Continuous Mode	2026-06-27T18:46:04.0300298Z Sleeping for 895.774789 seconds until 2026-06-27 18:46:00 UTC...
+run-bot	Run Live Bot in Continuous Mode	2026-06-27T18:57:07.7610720Z ##[error]The operation was canceled.
+run-bot	Post Checkout Repository	﻿2026-06-27T18:57:07.7742070Z Node 20 is being deprecated. This workflow is running with Node 24 by default. If you need to temporarily use Node 20, you can set the ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION=true environment variable. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/
+run-bot	Post Checkout Repository	2026-06-27T18:57:07.7743315Z Post job cleanup.
+run-bot	Post Checkout Repository	2026-06-27T18:57:07.9835448Z [command]/usr/bin/git version
+run-bot	Post Checkout Repository	2026-06-27T18:57:07.9836231Z git version 2.54.0
+run-bot	Post Checkout Repository	2026-06-27T18:57:07.9839013Z Copying '/home/runner/.gitconfig' to '/home/runner/work/_temp/2df0f3ea-f87e-412c-8aee-d97abb5879cf/.gitconfig'
+run-bot	Post Checkout Repository	2026-06-27T18:57:07.9840118Z Temporarily overriding HOME='/home/runner/work/_temp/2df0f3ea-f87e-412c-8aee-d97abb5879cf' before making global git config changes
+run-bot	Post Checkout Repository	2026-06-27T18:57:07.9841112Z Adding repository directory to the temporary git global config as a safe directory
+run-bot	Post Checkout Repository	2026-06-27T18:57:07.9841888Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/smc-paper-trader/smc-paper-trader
+run-bot	Post Checkout Repository	2026-06-27T18:57:07.9843484Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+run-bot	Post Checkout Repository	2026-06-27T18:57:07.9845213Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+run-bot	Post Checkout Repository	2026-06-27T18:57:07.9847100Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+run-bot	Post Checkout Repository	2026-06-27T18:57:07.9847721Z http.https://github.com/.extraheader
+run-bot	Post Checkout Repository	2026-06-27T18:57:07.9848865Z [command]/usr/bin/git config --local --unset-all http.https://github.com/.extraheader
+run-bot	Post Checkout Repository	2026-06-27T18:57:07.9851089Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+run-bot	Post Checkout Repository	2026-06-27T18:57:07.9853044Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+run-bot	Post Checkout Repository	2026-06-27T18:57:07.9854440Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+run-bot	Complete job	﻿2026-06-27T18:57:07.9912739Z Cleaning up orphan processes
+run-bot	Complete job	2026-06-27T18:57:08.0212795Z Terminate orphan process: pid (2160) (bash)
+run-bot	Complete job	2026-06-27T18:57:08.0250437Z Terminate orphan process: pid (2161) (python)
+run-bot	Complete job	2026-06-27T18:57:08.0308300Z Terminate orphan process: pid (2504) (sleep)
+run-bot	Complete job	2026-06-27T18:57:08.0319918Z ##[warning]Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/checkout@v4, actions/setup-python@v5. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/

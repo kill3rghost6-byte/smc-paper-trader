@@ -1,42 +1,4 @@
 {
-    "balance": 7052.977333280286,
-    "history_ids": [
-        "DOGEUSDT_1782564300.0",
-        "DOGEUSDT_1782560700.0"
-    ],
-    "live_positions": {
-        "BTCUSDT": {
-            "direction": "SHORT",
-            "entry": 59690.62,
-            "initial_sl": 60003.714751391744,
-            "sl": 60003.714751391744,
-            "tp1": 59168.79541434709,
-            "tp2": 58751.33574582477,
-            "tp1_done": false
-        },
-        "HBARUSDT": {
-            "direction": "LONG",
-            "entry": 0.07068,
-            "initial_sl": 0.07039909600387903,
-            "sl": 0.07039909600387903,
-            "tp1": 0.0711481733268683,
-            "tp2": 0.07152271198836294,
-            "tp1_done": false
-        },
-        "ARBUSDT": {
-            "direction": "SHORT",
-            "entry": 0.0731,
-            "initial_sl": 0.07342649594293034,
-            "sl": 0.07342649594293034,
-            "tp1": 0.07255584009511609,
-            "tp2": 0.07212051217120896,
-            "tp1_done": false
-        }
-    },
-    "live_orders": {},
-    "cooldown": {
-        "TRXUSDT": true,
-        "LTCUSDT": true,
-        "TONUSDT": true
-    }
+    "balance": 10000.0,
+    "history_ids": []
 }

@@ -1,4 +1,4 @@
-name: NICE Scalper Live Bot
+name: SMC Live Bot
 
 on:
   schedule:
@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
 
 concurrency:
-  group: nice-bot
+  group: smc-bot
   cancel-in-progress: true
 
 jobs:
@@ -37,7 +37,7 @@ jobs:
         PAPER_TRADE_START: "2026-06-27 00:00:00"
       run: |
         # Git config is needed by the Python script to push state.json
-        git config --global user.name 'NICE Bot'
-        git config --global user.email 'nice-bot@users.noreply.github.com'
+        git config --global user.name 'SMC Bot'
+        git config --global user.email 'smc-bot@users.noreply.github.com'
         
-        python nice_live_bot.py --continuous
+        python smc_live_bot.py --continuous

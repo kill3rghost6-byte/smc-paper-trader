@@ -42,7 +42,8 @@ class BinanceDataFetcher:
                 'limit': 1000
             }
             try:
-                response = requests.get(self.binance_base_url, params=params)
+                headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'}
+                response = requests.get(self.binance_base_url, params=params, headers=headers)
                 response.raise_for_status()
                 data = response.json()
                 
