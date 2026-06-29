@@ -402,6 +402,9 @@ def run_portfolio():
             any_action = True
             
     # Save State
+    if 'start_time' not in state_data:
+        state_data['start_time'] = PAPER_TRADE_START.isoformat()
+        
     save_and_push_state(state_data, state_file)
         
     if state_data['balance'] != initial_balance_run:
