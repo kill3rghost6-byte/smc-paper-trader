@@ -27,7 +27,10 @@ def send_telegram(message, max_retries=3):
                 time.sleep(3)
 
 def fetch_data(symbol, timeframe, limit=1000, max_retries=3):
-    exchange = ccxt.bybit()
+    exchange = ccxt.bybit({
+        'enableRateLimit': True,
+        'timeout': 15000,
+    })
     for attempt in range(max_retries):
         try:
             ohlcv = exchange.fetch_ohlcv(symbol, timeframe, limit=limit)
