@@ -11,7 +11,7 @@
     ],
     "positions": {
         "BTCUSDT": {
-            "active": false
+            "active": true
         },
         "DOGEUSDT": {
             "active": false
@@ -20,5 +20,5 @@
             "active": true
         }
     },
-    "last_heartbeat_time": 1782820825.3078299
+    "last_heartbeat_time": 1782821785.4601855
 }
