@@ -418,10 +418,8 @@ def run_portfolio():
 
 def run_continuous():
     send_telegram("🚀 **SMC Aggressive Bot Started in Continuous Mode** 🚀")
-    start_time = time.time()
-    max_duration = 5.5 * 3600 
     
-    while time.time() - start_time < max_duration:
+    while True:
         try:
             run_portfolio()
             
@@ -454,6 +452,7 @@ def run_continuous():
                         
         except Exception as e:
             print("Error in run_continuous logic:", e)
+            time.sleep(60)  # cooldown before retrying after crash
             
         now = datetime.datetime.utcnow()
         # Find next minute mark that is multiple of 15 (lowest timeframe in SMC is 15m)
