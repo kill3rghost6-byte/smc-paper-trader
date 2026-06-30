@@ -209,9 +209,20 @@ def get_live_state(df, tick_size, symbol):
             act_bear_1m_fvg_top = np.nan
             act_bear_1m_fvg_bot = np.nan
             
-        if not act_long_setup and limit_type == 1: limit_type = 0
-        if not act_short_setup and limit_type == -1: limit_type = 0
-            
+        # FIX: Cancel limit only if setup is fully invalidated AND price hasn't
+        # already crossed the entry (i.e. we missed the fill while offline).
+        # If price has blown PAST the entry, treat it as filled.
+        if not act_long_setup and limit_type == 1:
+            if not np.isnan(limit_entry_price) and h >= limit_entry_price:
+                pass  # price already past entry — keep limit so fill is registered below
+            else:
+                limit_type = 0
+        if not act_short_setup and limit_type == -1:
+            if not np.isnan(limit_entry_price) and l <= limit_entry_price:
+                pass  # price already past entry — keep limit so fill is registered below
+            else:
+                limit_type = 0
+
         if position == 0:
             if act_long_setup:
                 fib_lvl = lock_swing_high - in_fib_lvl * (lock_swing_high - lock_swing_low)
@@ -224,7 +235,7 @@ def get_live_state(df, tick_size, symbol):
                         tp_2r_price = limit_entry_price + (risk * in_tp1_r)
                         current_tp_price = limit_entry_price + (risk * in_tp2_r)
                         limit_type = 1
-                        
+
             if act_short_setup:
                 fib_lvl = lock_swing_low + in_fib_lvl * (lock_swing_high - lock_swing_low)
                 fib_786 = lock_swing_low + 0.786 * (lock_swing_high - lock_swing_low)
@@ -236,7 +247,8 @@ def get_live_state(df, tick_size, symbol):
                         tp_2r_price = limit_entry_price - (risk * in_tp1_r)
                         current_tp_price = limit_entry_price - (risk * in_tp2_r)
                         limit_type = -1
-                        
+
+            # Standard fill: candle touches entry from the right side
             if limit_type == 1 and l <= limit_entry_price and h >= limit_entry_price:
                 position = 1
                 entry_price = limit_entry_price + (tick_size * 2)
@@ -249,6 +261,29 @@ def get_live_state(df, tick_size, symbol):
             elif limit_type == -1 and h >= limit_entry_price and l <= limit_entry_price:
                 position = -1
                 entry_price = limit_entry_price - (tick_size * 2)
+                sl = initial_sl_price
+                tp1 = tp_2r_price
+                tp2 = current_tp_price
+                tp1_done = False
+                entry_time = df.index[i]
+                limit_type = 0
+            # FIX: "Blown past" fill — price skipped the entry level entirely
+            # (gap through entry). Register fill at the open of this candle.
+            elif limit_type == 1 and h < limit_entry_price:
+                # price dropped below entry without touching it from above — gap fill
+                position = 1
+                entry_price = o if (o := df['open'].values[i]) < limit_entry_price else limit_entry_price
+                sl = initial_sl_price
+                tp1 = tp_2r_price
+                tp2 = current_tp_price
+                tp1_done = False
+                entry_time = df.index[i]
+                limit_type = 0
+            elif limit_type == -1 and l > limit_entry_price:
+                # price jumped above entry without touching — gap fill
+                position = -1
+                o = df['open'].values[i]
+                entry_price = o if o > limit_entry_price else limit_entry_price
                 sl = initial_sl_price
                 tp1 = tp_2r_price
                 tp2 = current_tp_price
