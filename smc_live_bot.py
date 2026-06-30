@@ -26,25 +26,47 @@ def send_telegram(message, max_retries=3):
                 print(f"Telegram Error (Attempt {attempt+1}/{max_retries}): {e}")
                 time.sleep(3)
 
-# Initialize exchange once globally
-exchange = ccxt.bybit({
-    'enableRateLimit': True,
-    'timeout': 15000,
-})
+# ---------------------------------------------------------------------------
+# Data source: OKX Public API (no VPN/geo-restriction from Iran)
+# ---------------------------------------------------------------------------
+_OKX_TF_MAP = {'15m': '15m', '30m': '30m', '1h': '1H', '4h': '4H', '1d': '1D'}
+_OKX_SYM_MAP = {
+    'BTCUSDT':  'BTC-USDT',
+    'DOGEUSDT': 'DOGE-USDT',
+    'TRXUSDT':  'TRX-USDT',
+}
 
-def fetch_data(symbol, timeframe, limit=1000, max_retries=3):
-    global exchange
+def fetch_data(symbol, timeframe, limit=300, max_retries=5):
+    okx_sym = _OKX_SYM_MAP.get(symbol, symbol)
+    okx_tf  = _OKX_TF_MAP.get(timeframe, timeframe)
+    url = (
+        f"https://www.okx.com/api/v5/market/history-candles"
+        f"?instId={okx_sym}&bar={okx_tf}&limit={limit}"
+    )
     for attempt in range(max_retries):
         try:
-            ohlcv = exchange.fetch_ohlcv(symbol, timeframe, limit=limit)
-            df = pd.DataFrame(ohlcv, columns=['timestamp', 'open', 'high', 'low', 'close', 'volume'])
+            resp = requests.get(url, timeout=15)
+            resp.raise_for_status()
+            raw = resp.json().get('data', [])
+            if not raw:
+                raise ValueError("Empty candle data from OKX")
+            # OKX returns newest-first; columns: ts,o,h,l,c,vol,volCcy,volCcyQuote,confirm
+            rows = [
+                [int(d[0]), float(d[1]), float(d[2]), float(d[3]), float(d[4]), float(d[5])]
+                for d in raw
+            ]
+            df = pd.DataFrame(rows, columns=['timestamp','open','high','low','close','volume'])
             df['timestamp'] = pd.to_datetime(df['timestamp'], unit='ms')
+            df.sort_values('timestamp', inplace=True)
             df.set_index('timestamp', inplace=True)
-            return df.iloc[:-1]
+            return df.iloc[:-1]   # drop last (unfinished) candle
         except Exception as e:
-            print(f"Fetch Error for {symbol} (Attempt {attempt+1}): {e}")
-            if attempt == max_retries - 1: return None
-            time.sleep(5)
+            wait = 5 * (2 ** attempt)   # exponential back-off: 5,10,20,40,80s
+            print(f"Fetch Error for {symbol} (Attempt {attempt+1}/{max_retries}): {e}  — retrying in {wait}s")
+            if attempt < max_retries - 1:
+                time.sleep(wait)
+    return None
+
 
 def compute_indicators(df):
     df_4h = df['close'].resample('4h').last()
@@ -312,17 +334,22 @@ def get_live_state(df, tick_size, symbol):
 def save_and_push_state(state_data, state_file='state.json'):
     with open(state_file, 'w') as f:
         json.dump(state_data, f, indent=4)
-        
+
     try:
-        subprocess.run(["git", "add", state_file], check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-        status = subprocess.run(["git", "status", "--porcelain"], capture_output=True, text=True)
+        subprocess.run(["git", "add", state_file], check=True,
+                       stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        status = subprocess.run(["git", "status", "--porcelain"],
+                                capture_output=True, text=True)
         if state_file in status.stdout:
-            subprocess.run(["git", "commit", "-m", "Auto-update state.json [skip ci]"], check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-            subprocess.run(["git", "pull", "--rebase"], check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-            subprocess.run(["git", "push"], check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+            subprocess.run(["git", "commit", "-m", "Auto-update state.json [skip ci]"],
+                           check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+            # push with a simple non-rebase strategy to avoid conflicts
+            subprocess.run(["git", "push"], timeout=30,
+                           stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
             print("State successfully synced to GitHub.")
     except Exception as e:
-        print(f"Git Sync Error: {e}")
+        print(f"Git Sync Warning (non-critical): {e}")
+
 
 def run_portfolio():
     # Aggressive 5% Flat Risk Portfolio (per user request)
@@ -417,57 +444,51 @@ def run_portfolio():
         send_telegram(f"💰 **PAPER TRADING BALANCE UPDATED** 💰\nNew Balance: ${state_data['balance']:.2f}")
 
 def run_continuous():
-    send_telegram("🚀 **SMC Aggressive Bot Started in Continuous Mode** 🚀")
-    
+    send_telegram("[SMC BOT STARTED] Data: OKX | Interval: 16min")
+
+    SCAN_INTERVAL = 16 * 60  # 16 minutes in seconds
+
     while True:
+        cycle_start = time.time()
         try:
             run_portfolio()
-            
-            # 15-Minute Heartbeat Logic
-            current_time = time.time()
+
+            # --- Heartbeat: send status every 16-min cycle ---
             state_file = 'state.json'
-            
             if os.path.exists(state_file):
                 with open(state_file, 'r') as f:
                     state_data = json.load(f)
-                
+
                 last_heartbeat_time = state_data.get('last_heartbeat_time', 0)
-                
-                if current_time - last_heartbeat_time >= 15 * 60:
+                current_time = time.time()
+
+                if current_time - last_heartbeat_time >= SCAN_INTERVAL:
                     bal = state_data.get('balance', 10000.0)
                     positions = state_data.get('positions', {})
                     active_pos = [sym for sym, pos in positions.items() if pos.get('active')]
-                    
-                    msg = f"⏳ **SMC Status Update (15m)**\n💰 Balance: ${bal:,.2f}"
+
+                    msg = f"[SMC Status 16m] Balance: ${bal:,.2f}"
                     if active_pos:
-                        msg += f"\n📂 Open Positions: {', '.join(active_pos)}"
+                        msg += f" | Open: {', '.join(active_pos)}"
                     else:
-                        msg += "\n📂 No active positions."
-                        
+                        msg += " | No active positions."
+
                     send_telegram(msg)
-                    
+
                     state_data['last_heartbeat_time'] = current_time
                     with open(state_file, 'w') as f:
                         json.dump(state_data, f, indent=4)
-                        
+
         except Exception as e:
-            print("Error in run_continuous logic:", e)
-            time.sleep(60)  # cooldown before retrying after crash
-            
-        now = datetime.datetime.utcnow()
-        # Find next minute mark that is multiple of 15 (lowest timeframe in SMC is 15m)
-        minute = ((now.minute // 15) + 1) * 15
-        
-        # If it rolls over 60, handle it
-        if minute >= 60:
-            next_run = now.replace(minute=0, second=0, microsecond=0) + datetime.timedelta(hours=1)
-        else:
-            next_run = now.replace(minute=minute, second=0, microsecond=0)
-            
-        sleep_seconds = (next_run - now).total_seconds() + 2 # Add 2 seconds padding
-        if sleep_seconds > 0:
-            print(f"Sleeping for {sleep_seconds} seconds until {next_run} UTC...")
-            time.sleep(sleep_seconds)
+            print(f"[CYCLE ERROR] {e}")
+            time.sleep(30)  # short cooldown after unexpected crash
+
+        # Sleep for the remainder of the 16-minute window
+        elapsed = time.time() - cycle_start
+        sleep_sec = max(0, SCAN_INTERVAL - elapsed)
+        next_run = datetime.datetime.utcnow() + datetime.timedelta(seconds=sleep_sec)
+        print(f"Sleeping {sleep_sec:.0f}s until {next_run.strftime('%H:%M:%S')} UTC...")
+        time.sleep(sleep_sec)
 
 if __name__ == '__main__':
     import sys
@@ -475,3 +496,4 @@ if __name__ == '__main__':
         run_continuous()
     else:
         run_portfolio()
+
