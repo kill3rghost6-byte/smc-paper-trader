@@ -12,7 +12,10 @@ import json
 
 TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN", "8233036914:AAF699ijYWDwJebEKu__CH6QUrNvLx2TPnA")
 TELEGRAM_CHAT_ID = os.getenv("TELEGRAM_CHAT_ID", "5708853617")
-PAPER_TRADE_START = pd.to_datetime(os.getenv("PAPER_TRADE_START", datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")))
+# PAPER_TRADE_START is loaded from state.json on first run, NOT from env/current time.
+# This prevents the bug where restarting the bot causes it to miss trades.
+_STATE_FILE = 'state.json'
+_FALLBACK_START = "2026-06-27T00:00:00"
 
 def send_telegram(message, max_retries=3):
     print(f"Telegram Log: {message}")
@@ -351,97 +354,125 @@ def save_and_push_state(state_data, state_file='state.json'):
         print(f"Git Sync Warning (non-critical): {e}")
 
 
-def run_portfolio():
-    # Aggressive 5% Flat Risk Portfolio (per user request)
-    portfolio = {
-        'BTCUSDT': {'tf': '30m', 'risk': 0.0500},
-        'DOGEUSDT': {'tf': '15m', 'risk': 0.0500},
-        'TRXUSDT': {'tf': '30m', 'risk': 0.0500}
-    }
-    
-    state_file = 'state.json'
-    if os.path.exists(state_file):
-        with open(state_file, 'r') as f:
-            state_data = json.load(f)
+def load_state():
+    """Load state.json or create a fresh one. PAPER_TRADE_START is always
+    read from state.json so it survives bot restarts."""
+    if os.path.exists(_STATE_FILE):
+        with open(_STATE_FILE, 'r') as f:
+            s = json.load(f)
     else:
-        state_data = {
-            'balance': 10000.0,
-            'history_ids': []
-        }
-        
-    initial_balance_run = state_data['balance']
-    
+        s = {}
+
+    # ── Permanent defaults (written once, never overwritten) ──────────────
+    if 'balance' not in s:
+        s['balance'] = 10000.0
+    if 'history_ids' not in s:
+        s['history_ids'] = []
+    if 'positions' not in s:
+        s['positions'] = {}
+    # start_time persists forever; once written it is the true epoch
+    if 'start_time' not in s:
+        s['start_time'] = _FALLBACK_START
+    return s
+
+
+def _settle_trade(state_data, trade, risk, symbol):
+    """Apply a completed trade to the paper balance. Returns PnL."""
+    pnl = state_data['balance'] * risk * trade['r_multiple']
+    state_data['balance'] += pnl
+    state_data['history_ids'].append(trade['id'])
+    direction_emoji = 'LONG 📈' if trade['direction'] == 'LONG' else 'SHORT 📉'
+    result_emoji = '✅ WIN' if trade['r_multiple'] > 0 else '❌ LOSS'
+    msg = (
+        f"🚨 PAPER TRADE CLOSED: {symbol} 🚨\n"
+        f"Direction: {direction_emoji} | {result_emoji}\n"
+        f"R-Multiple: {trade['r_multiple']:.2f}R\n"
+        f"PnL: ${pnl:+.2f}\n"
+        f"New Balance: ${state_data['balance']:.2f}\n"
+        f"Entry: {trade['entry_time']}  Exit: {trade['exit_time']}"
+    )
+    send_telegram(msg)
+    return pnl
+
+
+def run_portfolio():
+    # ── BUG FIX #1: Load state with persistent start_time ─────────────────
+    state_data = load_state()
+    paper_start = pd.to_datetime(state_data['start_time'])
+
+    # Aggressive 5% Flat Risk Portfolio
+    portfolio = {
+        'BTCUSDT':  {'tf': '30m', 'risk': 0.0500},
+        'DOGEUSDT': {'tf': '15m', 'risk': 0.0500},
+        'TRXUSDT':  {'tf': '30m', 'risk': 0.0500},
+    }
+
+    initial_balance = state_data['balance']
     any_action = False
-    
+
     for symbol, info in portfolio.items():
         try:
-            tf = info['tf']
+            tf   = info['tf']
             risk = info['risk']
+
             df = fetch_data(symbol, tf)
-            if df is None or df.empty: continue
-            
+            if df is None or df.empty:
+                continue
+
             tick = df['close'].diff().abs().replace(0, np.nan).min()
-            if pd.isna(tick): tick = 0.0001
-            
-            df = compute_indicators(df)
+            if pd.isna(tick):
+                tick = 0.0001
+
+            df    = compute_indicators(df)
             state = get_live_state(df, tick, symbol)
-            
-            # Process new trades for Paper Trading
-            trade_closed_this_run = False
+
+            # ── BUG FIX #2: Settle ALL completed trades not yet accounted ──
+            trade_closed = False
             for trade in state['completed_trades']:
                 exit_time = pd.to_datetime(trade['exit_time'])
-                if exit_time >= PAPER_TRADE_START and trade['id'] not in state_data['history_ids']:
-                    trade_pnl = state_data['balance'] * risk * trade['r_multiple']
-                    state_data['balance'] += trade_pnl
-                    state_data['history_ids'].append(trade['id'])
-                    
-                    msg_trade = f"🚨 **PAPER TRADE CLOSED: {symbol}** 🚨\n"
-                    msg_trade += f"Direction: {trade['direction']}\n"
-                    msg_trade += f"R-Multiple: {trade['r_multiple']:.2f}R\n"
-                    msg_trade += f"PnL: ${trade_pnl:.2f}\n"
-                    msg_trade += f"New Balance: ${state_data['balance']:.2f}"
-                    send_telegram(msg_trade)
-                    trade_closed_this_run = True
-            
-            if state['position'] != 0 or state['limit_type'] != 0:
+                # Only count trades after our paper-trading start date
+                # and trades we have NOT already settled (history_ids guard)
+                if exit_time >= paper_start and trade['id'] not in state_data['history_ids']:
+                    _settle_trade(state_data, trade, risk, symbol)
+                    trade_closed = True
+                    any_action   = True
+
+            # ── BUG FIX #3: Always sync positions flag with reality ────────
+            # position==0 AND limit_type==0 means truly flat
+            is_active = (state['position'] != 0) or (state['limit_type'] != 0)
+            state_data['positions'][symbol] = {'active': is_active}
+
+            if is_active:
                 any_action = True
-                msg = f"🔍 **{symbol} ({tf})** - SMC Update\n"
+                msg = f"📡 {symbol} ({tf}) | SMC Update\n"
                 if state['position'] != 0:
-                    direction = "LONG 🟢" if state['position'] == 1 else "SHORT 🔴"
-                    msg += f"Currently IN POSITION: {direction}\n"
-                    msg += f"SL: {state['sl']:.5f}\n"
-                    msg += f"TP1 Reached: {'Yes ✅' if state['tp1_done'] else 'No ⌛'}\n"
-                    msg += f"SL at BE: {'Yes 🛡️' if state['sl_moved_to_be'] else 'No ⚠️'}\n"
-                elif state['limit_type'] != 0:
-                    direction = "LONG 🟢" if state['limit_type'] == 1 else "SHORT 🔴"
-                    msg += f"⚠️ **LIMIT ORDER ACTIVE** ⚠️\n"
-                    msg += f"Type: Limit {direction} | Risk: {risk * 100:.2f}%\n"
+                    direction = 'LONG 🟢' if state['position'] == 1 else 'SHORT 🔴'
+                    msg += f"IN POSITION: {direction}\n"
                     msg += f"Entry: {state['entry_price']:.5f} | SL: {state['sl']:.5f}\n"
-                    msg += f"TP1: {state['tp1']:.5f} | TP2: {state['tp2']:.5f}\n"
+                    msg += f"TP1 hit: {'Yes ✅' if state['tp1_done'] else 'No'} | "
+                    msg += f"SL@BE: {'Yes 🛡️' if state['sl_moved_to_be'] else 'No ⚠️'}"
+                else:  # limit order waiting
+                    direction = 'LONG 🟢' if state['limit_type'] == 1 else 'SHORT 🔴'
+                    msg += f"LIMIT ORDER: {direction} | Risk {risk*100:.1f}%\n"
+                    msg += f"Entry: {state['entry_price']:.5f} | SL: {state['sl']:.5f}\n"
+                    msg += f"TP1: {state['tp1']:.5f} | TP2: {state['tp2']:.5f}"
                 send_telegram(msg)
-            elif trade_closed_this_run:
-                any_action = True
-            
-            if 'positions' not in state_data:
-                state_data['positions'] = {}
-                
-            if state['position'] != 0 or state['limit_type'] != 0:
-                state_data['positions'][symbol] = {'active': True}
-            else:
-                state_data['positions'][symbol] = {'active': False}
-                
+
         except Exception as e:
-            send_telegram(f"❌ Error processing {symbol}: {str(e)}")
+            print(f"[ERROR] {symbol}: {e}")
+            send_telegram(f"❌ Error processing {symbol}: {e}")
             any_action = True
-            
+
     # Save State
-    if 'start_time' not in state_data:
-        state_data['start_time'] = PAPER_TRADE_START.isoformat()
-        
-    save_and_push_state(state_data, state_file)
-        
-    if state_data['balance'] != initial_balance_run:
-        send_telegram(f"💰 **PAPER TRADING BALANCE UPDATED** 💰\nNew Balance: ${state_data['balance']:.2f}")
+    save_and_push_state(state_data, _STATE_FILE)
+
+    # ── BUG FIX #4: Balance notification only when it actually changed ─────
+    if state_data['balance'] != initial_balance:
+        send_telegram(
+            f"💰 BALANCE UPDATE\n"
+            f"Change: ${state_data['balance'] - initial_balance:+.2f}\n"
+            f"New Balance: ${state_data['balance']:.2f}"
+        )
 
 def run_continuous():
     send_telegram("[SMC BOT STARTED] Data: OKX | Interval: 16min")
