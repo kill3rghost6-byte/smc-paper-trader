@@ -1,24 +1,26 @@
-name: SMC Live Bot
+name: SMC Live Bot - 24/7 Cloud Runner
 
 on:
   schedule:
-    # Every 16 minutes — this is as fine-grained as GitHub allows (minimum 5 min)
-    # We chain 4 runs using offsets to cover every ~16 min window:
-    - cron: '0,16,32,48 * * * *'
+    # Fire every hour as a backup guardian (GitHub won't suspend hourly crons)
+    - cron: '0 * * * *'
   workflow_dispatch:
 
+# Allow only one instance at a time
 concurrency:
-  group: smc-bot
-  cancel-in-progress: true   # Prevent overlapping runs
+  group: smc-bot-runner
+  cancel-in-progress: false   # Do NOT cancel running — let it finish then new one starts
 
 jobs:
   run-bot:
     runs-on: ubuntu-latest
+    timeout-minutes: 350      # Run for ~5.8 hours (GitHub max is 6h for free tier)
     permissions:
-      contents: write          # Needed to push state.json back
+      contents: write
+      actions: write           # Needed to trigger new workflow runs
 
     steps:
-    - name: Checkout Repository (with latest state)
+    - name: Checkout Repository
       uses: actions/checkout@v4
       with:
         fetch-depth: 1
@@ -38,20 +40,22 @@ jobs:
       run: |
         git config --global user.name 'SMC Cloud Bot'
         git config --global user.email 'smc-bot@users.noreply.github.com'
+        # Store GitHub token for pushing
+        git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/kill3rghost6-byte/smc-paper-trader.git
 
-    - name: Pull latest state before running
-      run: |
-        git pull --rebase origin master || true
-
-    - name: Run One Scan Cycle
+    - name: Run Continuous Bot Loop (5.5 hours)
       env:
         TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
         TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
-        python smc_live_bot.py --once
+        python smc_live_bot.py --continuous-cloud
 
-    - name: Push Updated State to GitHub
+    - name: Self-Trigger Next Run (ensures 24/7 continuity)
+      if: always()
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
-        git add state.json
-        git diff --cached --quiet || git commit -m "Auto-update state.json [skip ci]"
-        git push origin master || (git pull --rebase origin master && git push origin master)
+        echo "Triggering next 5.5-hour window..."
+        gh workflow run smc_live_bot.yml --repo kill3rghost6-byte/smc-paper-trader
+        echo "Next run triggered successfully."

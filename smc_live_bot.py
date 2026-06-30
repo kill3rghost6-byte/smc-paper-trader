@@ -508,15 +508,34 @@ def run_portfolio():
             f"New Balance: ${state_data['balance']:.2f}"
         )
 
+def _git_push_state():
+    """Commit and push state.json to GitHub. Used in cloud continuous mode."""
+    try:
+        subprocess.run(["git", "add", _STATE_FILE], check=True,
+                       stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        status = subprocess.run(["git", "diff", "--cached", "--quiet"],
+                                stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        if status.returncode != 0:  # There are staged changes
+            subprocess.run(
+                ["git", "commit", "-m", "bot: state update"],  # No [skip ci] — avoids GitHub throttle
+                check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+            # Pull-rebase first to avoid conflicts with concurrent runs
+            subprocess.run(["git", "pull", "--rebase", "origin", "master"],
+                           stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+            subprocess.run(["git", "push", "origin", "master"], timeout=30,
+                           stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+            print("State pushed to GitHub.")
+    except Exception as e:
+        print(f"Git push warning (non-critical): {e}")
+
+
 def run_once():
     """
-    Cloud/cron mode: run one full scan cycle, send status, then exit.
-    GitHub Actions calls this every 16 minutes via cron schedule.
-    State is persisted in state.json which is committed back to the repo.
+    Single-scan mode: run one full portfolio scan, send status heartbeat, push state.
+    Used by GitHub Actions --once flag and as the core unit for all modes.
     """
     run_portfolio()
 
-    # Always send a status heartbeat after each cloud scan
     if os.path.exists(_STATE_FILE):
         with open(_STATE_FILE, 'r') as f:
             state_data = json.load(f)
@@ -539,9 +558,55 @@ def run_once():
             json.dump(state_data, f, indent=4)
 
 
+def run_continuous_cloud():
+    """
+    24/7 Cloud mode for GitHub Actions.
+    Runs for ~5.5 hours (just under GitHub's 6-hour job limit), scanning every 16 minutes.
+    After each scan, state.json is committed and pushed to the repo so it's never lost.
+    The workflow's final step triggers a new run, creating an unbreakable chain.
+    """
+    SCAN_INTERVAL = 16 * 60        # 16 minutes between scans
+    MAX_RUNTIME   = 5.5 * 3600    # 5.5 hours max (GitHub limit = 6h)
+    bot_start     = time.time()
+
+    send_telegram(f"☁️ [SMC Cloud Bot STARTED] 24/7 mode active. Scanning every 16 min.")
+
+    cycle_num = 0
+    while True:
+        elapsed_total = time.time() - bot_start
+
+        # Exit cleanly before GitHub kills us (leave 3 min buffer)
+        if elapsed_total >= MAX_RUNTIME - 180:
+            send_telegram(f"☁️ [SMC] Session ending after {elapsed_total/3600:.1f}h — next session starting automatically.")
+            print(f"Graceful exit after {elapsed_total:.0f}s.")
+            break
+
+        cycle_num += 1
+        cycle_start = time.time()
+        print(f"\n{'='*50}")
+        print(f"CYCLE #{cycle_num} | {datetime.datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')} UTC")
+        print(f"Total elapsed: {elapsed_total/60:.1f} min")
+        print(f"{'='*50}")
+
+        try:
+            run_once()
+            _git_push_state()
+        except Exception as e:
+            print(f"[CYCLE ERROR] {e}")
+            send_telegram(f"⚠️ SMC Scan Error: {e}")
+            time.sleep(30)
+
+        # Precise sleep: wait until next 16-min boundary
+        cycle_elapsed = time.time() - cycle_start
+        sleep_sec = max(0, SCAN_INTERVAL - cycle_elapsed)
+        next_run = datetime.datetime.utcnow() + datetime.timedelta(seconds=sleep_sec)
+        print(f"Next scan at {next_run.strftime('%H:%M:%S')} UTC (sleeping {sleep_sec:.0f}s)...")
+        time.sleep(sleep_sec)
+
+
 def run_continuous():
-    """Legacy local mode — kept for manual debugging only."""
-    send_telegram("[SMC BOT STARTED LOCAL] Data: OKX | Interval: 16min")
+    """Legacy local debug mode."""
+    send_telegram("[SMC BOT LOCAL DEBUG MODE]")
     SCAN_INTERVAL = 16 * 60
     while True:
         cycle_start = time.time()
@@ -552,17 +617,21 @@ def run_continuous():
             time.sleep(30)
         elapsed = time.time() - cycle_start
         sleep_sec = max(0, SCAN_INTERVAL - elapsed)
-        next_run = datetime.datetime.utcnow() + datetime.timedelta(seconds=sleep_sec)
-        print(f"Sleeping {sleep_sec:.0f}s until {next_run.strftime('%H:%M:%S')} UTC...")
         time.sleep(sleep_sec)
 
 
 if __name__ == '__main__':
     import sys
-    if len(sys.argv) > 1 and sys.argv[1] == '--once':
+    mode = sys.argv[1] if len(sys.argv) > 1 else '--continuous-cloud'
+    if mode == '--once':
         run_once()
-    elif len(sys.argv) > 1 and sys.argv[1] == '--continuous':
+    elif mode == '--continuous-cloud':
+        run_continuous_cloud()
+    elif mode == '--continuous':
         run_continuous()
     else:
-        run_once()  # default: single scan (cloud mode)
+        run_continuous_cloud()  # default = cloud mode
+
+
+
 
