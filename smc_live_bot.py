@@ -2,6 +2,7 @@ import ccxt
 import pandas as pd
 import numpy as np
 import subprocess
+import sys
 import time
 from ta.trend import EMAIndicator
 from ta.volatility import AverageTrueRange
@@ -10,24 +11,35 @@ import os
 import requests
 import json
 
-TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN", "8233036914:AAF699ijYWDwJebEKu__CH6QUrNvLx2TPnA")
-TELEGRAM_CHAT_ID = os.getenv("TELEGRAM_CHAT_ID", "5708853617")
-# PAPER_TRADE_START is loaded from state.json on first run, NOT from env/current time.
-# This prevents the bug where restarting the bot causes it to miss trades.
-_STATE_FILE = 'state.json'
+# Force unbuffered output — critical for GitHub Actions live logs
+sys.stdout.reconfigure(line_buffering=True)
+os.environ["PYTHONUNBUFFERED"] = "1"
+
+# Read tokens: if GitHub Secret is empty string, fall back to hardcoded default
+_ENV_TOKEN   = os.getenv("TELEGRAM_BOT_TOKEN", "").strip()
+_ENV_CHAT_ID = os.getenv("TELEGRAM_CHAT_ID", "").strip()
+TELEGRAM_BOT_TOKEN = _ENV_TOKEN   if _ENV_TOKEN   else "8233036914:AAF699ijYWDwJebEKu__CH6QUrNvLx2TPnA"
+TELEGRAM_CHAT_ID   = _ENV_CHAT_ID if _ENV_CHAT_ID else "5708853617"
+
+_STATE_FILE    = 'state.json'
 _FALLBACK_START = "2026-06-27T00:00:00"
 
+print(f"[INIT] Token ends with: ...{TELEGRAM_BOT_TOKEN[-6:]} | Chat: {TELEGRAM_CHAT_ID}", flush=True)
+
 def send_telegram(message, max_retries=3):
-    print(f"Telegram Log: {message}")
-    if TELEGRAM_BOT_TOKEN and TELEGRAM_CHAT_ID:
-        url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendMessage"
-        for attempt in range(max_retries):
-            try:
-                requests.post(url, json={"chat_id": TELEGRAM_CHAT_ID, "text": message}, timeout=10)
-                return
-            except Exception as e:
-                print(f"Telegram Error (Attempt {attempt+1}/{max_retries}): {e}")
-                time.sleep(3)
+    print(f"[TG] {message}", flush=True)
+    url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendMessage"
+    for attempt in range(max_retries):
+        try:
+            resp = requests.post(url, json={"chat_id": TELEGRAM_CHAT_ID, "text": message}, timeout=15)
+            data = resp.json()
+            if data.get("ok"):
+                return  # success
+            else:
+                print(f"[TG ERROR] API returned: {data}", flush=True)
+        except Exception as e:
+            print(f"[TG ERROR attempt {attempt+1}] {e}", flush=True)
+            time.sleep(3)
 
 # ---------------------------------------------------------------------------
 # Data source: OKX Public API (no VPN/geo-restriction from Iran)
