@@ -2,42 +2,56 @@ name: SMC Live Bot
 
 on:
   schedule:
-    # Runs every 5 hours to spawn a continuous 5.5 hour worker
-    - cron: '0 */5 * * *'
+    # Every 16 minutes — this is as fine-grained as GitHub allows (minimum 5 min)
+    # We chain 4 runs using offsets to cover every ~16 min window:
+    - cron: '0,16,32,48 * * * *'
   workflow_dispatch:
 
 concurrency:
   group: smc-bot
-  cancel-in-progress: true
+  cancel-in-progress: true   # Prevent overlapping runs
 
 jobs:
   run-bot:
     runs-on: ubuntu-latest
     permissions:
-      contents: write
-    
+      contents: write          # Needed to push state.json back
+
     steps:
-    - name: Checkout Repository
+    - name: Checkout Repository (with latest state)
       uses: actions/checkout@v4
-      
+      with:
+        fetch-depth: 1
+        token: ${{ secrets.GITHUB_TOKEN }}
+
     - name: Set up Python
       uses: actions/setup-python@v5
       with:
         python-version: '3.10'
-        
+
     - name: Install Dependencies
       run: |
         python -m pip install --upgrade pip
         pip install pandas numpy ta ccxt requests
-        
-    - name: Run Live Bot in Continuous Mode
+
+    - name: Configure Git
+      run: |
+        git config --global user.name 'SMC Cloud Bot'
+        git config --global user.email 'smc-bot@users.noreply.github.com'
+
+    - name: Pull latest state before running
+      run: |
+        git pull --rebase origin master || true
+
+    - name: Run One Scan Cycle
       env:
         TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
         TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
-        PAPER_TRADE_START: "2026-06-27 00:00:00"
       run: |
-        # Git config is needed by the Python script to push state.json
-        git config --global user.name 'SMC Bot'
-        git config --global user.email 'smc-bot@users.noreply.github.com'
-        
-        python smc_live_bot.py --continuous
+        python smc_live_bot.py --once
+
+    - name: Push Updated State to GitHub
+      run: |
+        git add state.json
+        git diff --cached --quiet || git commit -m "Auto-update state.json [skip ci]"
+        git push origin master || (git pull --rebase origin master && git push origin master)

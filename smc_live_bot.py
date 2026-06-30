@@ -508,57 +508,61 @@ def run_portfolio():
             f"New Balance: ${state_data['balance']:.2f}"
         )
 
+def run_once():
+    """
+    Cloud/cron mode: run one full scan cycle, send status, then exit.
+    GitHub Actions calls this every 16 minutes via cron schedule.
+    State is persisted in state.json which is committed back to the repo.
+    """
+    run_portfolio()
+
+    # Always send a status heartbeat after each cloud scan
+    if os.path.exists(_STATE_FILE):
+        with open(_STATE_FILE, 'r') as f:
+            state_data = json.load(f)
+
+        bal = state_data.get('balance', 10000.0)
+        positions = state_data.get('positions', {})
+        active_pos = [sym for sym, pos in positions.items() if pos.get('active')]
+
+        now_utc = datetime.datetime.utcnow().strftime('%H:%M UTC')
+        msg = f"[SMC Scan {now_utc}] Balance: ${bal:,.2f}"
+        if active_pos:
+            msg += f" | Open: {', '.join(active_pos)}"
+        else:
+            msg += " | No active positions."
+
+        send_telegram(msg)
+
+        state_data['last_heartbeat_time'] = time.time()
+        with open(_STATE_FILE, 'w') as f:
+            json.dump(state_data, f, indent=4)
+
+
 def run_continuous():
-    send_telegram("[SMC BOT STARTED] Data: OKX | Interval: 16min")
-
-    SCAN_INTERVAL = 16 * 60  # 16 minutes in seconds
-
+    """Legacy local mode — kept for manual debugging only."""
+    send_telegram("[SMC BOT STARTED LOCAL] Data: OKX | Interval: 16min")
+    SCAN_INTERVAL = 16 * 60
     while True:
         cycle_start = time.time()
         try:
-            run_portfolio()
-
-            # --- Heartbeat: send status every 16-min cycle ---
-            state_file = 'state.json'
-            if os.path.exists(state_file):
-                with open(state_file, 'r') as f:
-                    state_data = json.load(f)
-
-                last_heartbeat_time = state_data.get('last_heartbeat_time', 0)
-                current_time = time.time()
-
-                if current_time - last_heartbeat_time >= SCAN_INTERVAL:
-                    bal = state_data.get('balance', 10000.0)
-                    positions = state_data.get('positions', {})
-                    active_pos = [sym for sym, pos in positions.items() if pos.get('active')]
-
-                    msg = f"[SMC Status 16m] Balance: ${bal:,.2f}"
-                    if active_pos:
-                        msg += f" | Open: {', '.join(active_pos)}"
-                    else:
-                        msg += " | No active positions."
-
-                    send_telegram(msg)
-
-                    state_data['last_heartbeat_time'] = current_time
-                    with open(state_file, 'w') as f:
-                        json.dump(state_data, f, indent=4)
-
+            run_once()
         except Exception as e:
             print(f"[CYCLE ERROR] {e}")
-            time.sleep(30)  # short cooldown after unexpected crash
-
-        # Sleep for the remainder of the 16-minute window
+            time.sleep(30)
         elapsed = time.time() - cycle_start
         sleep_sec = max(0, SCAN_INTERVAL - elapsed)
         next_run = datetime.datetime.utcnow() + datetime.timedelta(seconds=sleep_sec)
         print(f"Sleeping {sleep_sec:.0f}s until {next_run.strftime('%H:%M:%S')} UTC...")
         time.sleep(sleep_sec)
 
+
 if __name__ == '__main__':
     import sys
-    if len(sys.argv) > 1 and sys.argv[1] == '--continuous':
+    if len(sys.argv) > 1 and sys.argv[1] == '--once':
+        run_once()
+    elif len(sys.argv) > 1 and sys.argv[1] == '--continuous':
         run_continuous()
     else:
-        run_portfolio()
+        run_once()  # default: single scan (cloud mode)
 
