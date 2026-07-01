@@ -380,9 +380,23 @@ def get_live_state(df, tick_size, symbol):
         'completed_trades': completed_trades
     }
 
+def _atomic_write_json(data, filepath):
+    """Write JSON atomically: write to temp file first, then rename.
+    This prevents corruption if the process is killed mid-write."""
+    tmp_path = filepath + '.tmp'
+    content = json.dumps(data, indent=4)
+    # Validate before writing — if this raises, we abort and keep old file
+    json.loads(content)
+    with open(tmp_path, 'w') as f:
+        f.write(content)
+        f.flush()
+        os.fsync(f.fileno())
+    os.replace(tmp_path, filepath)  # atomic on Linux/Mac
+
+
 def save_and_push_state(state_data, state_file='state.json'):
-    with open(state_file, 'w') as f:
-        json.dump(state_data, f, indent=4)
+    """Atomically save state to disk and push to GitHub."""
+    _atomic_write_json(state_data, state_file)
 
     try:
         subprocess.run(["git", "add", state_file], check=True,
@@ -390,35 +404,49 @@ def save_and_push_state(state_data, state_file='state.json'):
         status = subprocess.run(["git", "status", "--porcelain"],
                                 capture_output=True, text=True)
         if state_file in status.stdout:
-            subprocess.run(["git", "commit", "-m", "Auto-update state.json [skip ci]"],
+            subprocess.run(["git", "commit", "-m", "bot: state update"],
                            check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-            # push with a simple non-rebase strategy to avoid conflicts
             subprocess.run(["git", "push"], timeout=30,
                            stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-            print("State successfully synced to GitHub.")
+            print("State synced to GitHub.", flush=True)
     except Exception as e:
-        print(f"Git Sync Warning (non-critical): {e}")
+        print(f"Git sync warning (non-critical): {e}", flush=True)
 
 
 def load_state():
-    """Load state.json or create a fresh one. PAPER_TRADE_START is always
-    read from state.json so it survives bot restarts."""
+    """Load state.json safely with corruption recovery.
+    If the file is corrupted (bad JSON), renames it and starts fresh.
+    """
     if os.path.exists(_STATE_FILE):
-        with open(_STATE_FILE, 'r') as f:
-            s = json.load(f)
+        # Try up to 3 times in case a concurrent write is in progress
+        for attempt in range(3):
+            try:
+                with open(_STATE_FILE, 'r') as f:
+                    content = f.read().strip()
+                if not content:
+                    raise ValueError("Empty state file")
+                s = json.loads(content)
+                break  # success
+            except (json.JSONDecodeError, ValueError) as e:
+                if attempt < 2:
+                    print(f"[WARN] state.json read attempt {attempt+1} failed: {e} — retrying...", flush=True)
+                    time.sleep(1)
+                else:
+                    # Last resort: backup corrupted file and start fresh
+                    import shutil
+                    backup = _STATE_FILE + f'.corrupted_{int(time.time())}'
+                    shutil.copy(_STATE_FILE, backup)
+                    print(f"[ERROR] state.json corrupted — backed up to {backup}, starting fresh", flush=True)
+                    send_telegram(f"⚠️ state.json was corrupted and reset. Backup saved. Balance may need review.")
+                    s = {}
     else:
         s = {}
 
-    # ── Permanent defaults (written once, never overwritten) ──────────────
-    if 'balance' not in s:
-        s['balance'] = 10000.0
-    if 'history_ids' not in s:
-        s['history_ids'] = []
-    if 'positions' not in s:
-        s['positions'] = {}
-    # start_time persists forever; once written it is the true epoch
-    if 'start_time' not in s:
-        s['start_time'] = _FALLBACK_START
+    # Permanent defaults
+    if 'balance'     not in s: s['balance']     = 10000.0
+    if 'history_ids' not in s: s['history_ids'] = []
+    if 'positions'   not in s: s['positions']   = {}
+    if 'start_time'  not in s: s['start_time']  = _FALLBACK_START
     return s
 
 
@@ -521,39 +549,37 @@ def run_portfolio():
         )
 
 def _git_push_state():
-    """Commit and push state.json to GitHub. Used in cloud continuous mode."""
+    """Push state.json to GitHub (used in continuous-cloud mode).
+    save_and_push_state already writes atomically; this just does the git push.
+    """
     try:
         subprocess.run(["git", "add", _STATE_FILE], check=True,
                        stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
         status = subprocess.run(["git", "diff", "--cached", "--quiet"],
                                 stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-        if status.returncode != 0:  # There are staged changes
+        if status.returncode != 0:
             subprocess.run(
-                ["git", "commit", "-m", "bot: state update"],  # No [skip ci] — avoids GitHub throttle
+                ["git", "commit", "-m", "bot: state update"],
                 check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-            # Pull-rebase first to avoid conflicts with concurrent runs
             subprocess.run(["git", "pull", "--rebase", "origin", "master"],
                            stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
             subprocess.run(["git", "push", "origin", "master"], timeout=30,
                            stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-            print("State pushed to GitHub.")
+            print("State pushed to GitHub.", flush=True)
     except Exception as e:
-        print(f"Git push warning (non-critical): {e}")
+        print(f"Git push warning (non-critical): {e}", flush=True)
 
 
 def run_once():
     """
     Single-scan mode: run one full portfolio scan, send status heartbeat, push state.
-    Used by GitHub Actions --once flag and as the core unit for all modes.
     """
     run_portfolio()
 
     if os.path.exists(_STATE_FILE):
-        with open(_STATE_FILE, 'r') as f:
-            state_data = json.load(f)
-
-        bal = state_data.get('balance', 10000.0)
-        positions = state_data.get('positions', {})
+        s = load_state()  # uses safe loader with retry
+        bal = s.get('balance', 10000.0)
+        positions = s.get('positions', {})
         active_pos = [sym for sym, pos in positions.items() if pos.get('active')]
 
         now_utc = datetime.datetime.utcnow().strftime('%H:%M UTC')
@@ -565,9 +591,8 @@ def run_once():
 
         send_telegram(msg)
 
-        state_data['last_heartbeat_time'] = time.time()
-        with open(_STATE_FILE, 'w') as f:
-            json.dump(state_data, f, indent=4)
+        s['last_heartbeat_time'] = time.time()
+        _atomic_write_json(s, _STATE_FILE)  # atomic, no corruption
 
 
 def run_continuous_cloud():
