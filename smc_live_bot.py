@@ -406,6 +406,14 @@ def save_and_push_state(state_data, state_file='state.json'):
         if state_file in status.stdout:
             subprocess.run(["git", "commit", "-m", "bot: state update"],
                            check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+            
+            # Pull with rebase strategy theirs to avoid conflicts
+            pull_res = subprocess.run(["git", "pull", "--rebase", "-X", "theirs", "origin", "master"],
+                                      stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+            if pull_res.returncode != 0:
+                subprocess.run(["git", "rebase", "--abort"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+                subprocess.run(["git", "reset", "--hard", "origin/master"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+            
             subprocess.run(["git", "push"], timeout=30,
                            stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
             print("State synced to GitHub.", flush=True)
@@ -561,8 +569,13 @@ def _git_push_state():
             subprocess.run(
                 ["git", "commit", "-m", "bot: state update"],
                 check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-            subprocess.run(["git", "pull", "--rebase", "origin", "master"],
-                           stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+            
+            pull_res = subprocess.run(["git", "pull", "--rebase", "-X", "theirs", "origin", "master"],
+                                      stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+            if pull_res.returncode != 0:
+                subprocess.run(["git", "rebase", "--abort"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+                subprocess.run(["git", "reset", "--hard", "origin/master"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+                
             subprocess.run(["git", "push", "origin", "master"], timeout=30,
                            stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
             print("State pushed to GitHub.", flush=True)
