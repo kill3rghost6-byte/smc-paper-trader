@@ -226,25 +226,31 @@ def get_live_state(df, tick_size, symbol):
                 fib_lvl = lock_swing_high - in_fib_lvl * (lock_swing_high - lock_swing_low)
                 fib_786 = lock_swing_high - 0.786 * (lock_swing_high - lock_swing_low)
                 if not np.isnan(act_bull_1m_fvg_top) and act_bull_1m_fvg_top <= fib_lvl and act_bull_1m_fvg_bot >= fib_786:
-                    limit_entry_price = (act_bull_1m_fvg_top + act_bull_1m_fvg_bot) / 2
-                    initial_sl_price = lock_swing_low - (atrs[i] * 0.5)
-                    risk = limit_entry_price - initial_sl_price
-                    if risk > 0:
-                        tp_2r_price = limit_entry_price + (risk * in_tp1_r)
-                        current_tp_price = limit_entry_price + (risk * in_tp2_r)
-                        limit_type = 1
+                    # LOCK-IN: Only set a new limit if we don't already have one pending.
+                    # Once placed, a limit order is never replaced — only cancelled on
+                    # setup invalidation or TP2-before-entry.
+                    if limit_type == 0:
+                        limit_entry_price = (act_bull_1m_fvg_top + act_bull_1m_fvg_bot) / 2
+                        initial_sl_price = lock_swing_low - (atrs[i] * 0.5)
+                        risk = limit_entry_price - initial_sl_price
+                        if risk > 0:
+                            tp_2r_price = limit_entry_price + (risk * in_tp1_r)
+                            current_tp_price = limit_entry_price + (risk * in_tp2_r)
+                            limit_type = 1
 
             if act_short_setup:
                 fib_lvl = lock_swing_low + in_fib_lvl * (lock_swing_high - lock_swing_low)
                 fib_786 = lock_swing_low + 0.786 * (lock_swing_high - lock_swing_low)
                 if not np.isnan(act_bear_1m_fvg_top) and act_bear_1m_fvg_bot >= fib_lvl and act_bear_1m_fvg_top <= fib_786:
-                    limit_entry_price = (act_bear_1m_fvg_top + act_bear_1m_fvg_bot) / 2
-                    initial_sl_price = lock_swing_high + (atrs[i] * 0.5)
-                    risk = initial_sl_price - limit_entry_price
-                    if risk > 0:
-                        tp_2r_price = limit_entry_price - (risk * in_tp1_r)
-                        current_tp_price = limit_entry_price - (risk * in_tp2_r)
-                        limit_type = -1
+                    # LOCK-IN: Only set a new limit if we don't already have one pending.
+                    if limit_type == 0:
+                        limit_entry_price = (act_bear_1m_fvg_top + act_bear_1m_fvg_bot) / 2
+                        initial_sl_price = lock_swing_high + (atrs[i] * 0.5)
+                        risk = initial_sl_price - limit_entry_price
+                        if risk > 0:
+                            tp_2r_price = limit_entry_price - (risk * in_tp1_r)
+                            current_tp_price = limit_entry_price - (risk * in_tp2_r)
+                            limit_type = -1
 
             # Standard fill: candle touches entry from the right side
             if limit_type == 1 and l <= limit_entry_price and h >= limit_entry_price:
