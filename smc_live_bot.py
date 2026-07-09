@@ -446,13 +446,33 @@ def load_state():
                     print(f"[WARN] state.json read attempt {attempt+1} failed: {e} — retrying...", flush=True)
                     time.sleep(1)
                 else:
-                    # Last resort: backup corrupted file and start fresh
+                    # Last resort: backup corrupted file, then try to restore from git remote
                     import shutil
                     backup = _STATE_FILE + f'.corrupted_{int(time.time())}'
                     shutil.copy(_STATE_FILE, backup)
-                    print(f"[ERROR] state.json corrupted — backed up to {backup}, starting fresh", flush=True)
-                    send_telegram(f"⚠️ state.json was corrupted and reset. Backup saved. Balance may need review.")
-                    s = {}
+                    print(f"[ERROR] state.json corrupted — backed up to {backup}, attempting git restore", flush=True)
+                    # Try to fetch the last known-good state.json from git origin
+                    try:
+                        restore = subprocess.run(
+                            ["git", "fetch", "origin", "master"],
+                            capture_output=True, timeout=15
+                        )
+                        restore2 = subprocess.run(
+                            ["git", "checkout", "origin/master", "--", _STATE_FILE],
+                            capture_output=True, timeout=10
+                        )
+                        if restore2.returncode == 0:
+                            with open(_STATE_FILE, 'r') as f:
+                                s = json.loads(f.read().strip())
+                            print("[RECOVERY] Restored state.json from git origin. No balance reset needed.", flush=True)
+                            send_telegram("⚠️ state.json was corrupted but RESTORED from GitHub. Balance preserved.")
+                            break  # success — exit retry loop with restored state
+                        else:
+                            raise RuntimeError("git checkout failed")
+                    except Exception as git_err:
+                        print(f"[RECOVERY FAILED] Could not restore from git: {git_err} — starting fresh", flush=True)
+                        send_telegram("⚠️ state.json corrupted and git restore failed. Starting fresh. Balance may need review.")
+                        s = {}
     else:
         s = {}
 
@@ -488,11 +508,11 @@ def run_portfolio():
     state_data = load_state()
     paper_start = pd.to_datetime(state_data['start_time'])
 
-    # Aggressive 5% Flat Risk Portfolio
+    # Portfolio: all symbols and their correct timeframes
     portfolio = {
         'BTCUSDT':  {'tf': '30m', 'risk': 0.0500},
         'DOGEUSDT': {'tf': '15m', 'risk': 0.0500},
-        'TRXUSDT':  {'tf': '30m', 'risk': 0.0500},
+        'TRXUSDT':  {'tf': '15m', 'risk': 0.0500},  # FIX: was incorrectly 30m
     }
 
     initial_balance = state_data['balance']
