@@ -512,7 +512,7 @@ def run_portfolio():
     portfolio = {
         'BTCUSDT':  {'tf': '30m', 'risk': 0.0500},
         'DOGEUSDT': {'tf': '15m', 'risk': 0.0500},
-        'TRXUSDT':  {'tf': '15m', 'risk': 0.0500},  # FIX: was incorrectly 30m
+        'TRXUSDT':  {'tf': '30m', 'risk': 0.0500},
     }
 
     initial_balance = state_data['balance']
