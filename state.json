@@ -22,7 +22,7 @@
             "active": false
         },
         "TRXUSDT": {
-            "active": false
+            "active": true
         }
     },
     "last_heartbeat_time": 1784450972.4121604
