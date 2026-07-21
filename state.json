@@ -19,7 +19,7 @@
     ],
     "positions": {
         "BTCUSDT": {
-            "active": false
+            "active": true
         },
         "DOGEUSDT": {
             "active": true
