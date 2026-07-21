@@ -22,7 +22,7 @@
             "active": true
         },
         "DOGEUSDT": {
-            "active": true
+            "active": false
         },
         "TRXUSDT": {
             "active": false
