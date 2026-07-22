@@ -721,27 +721,79 @@ def _git_push_state():
 
 def run_once():
     """
-    Single-scan mode: run one full portfolio scan, send status heartbeat, push state.
+    Single-scan mode: run one full portfolio scan, send detailed live PnL status heartbeat, push state.
     """
     run_portfolio()
 
     if os.path.exists(_STATE_FILE):
-        s = load_state()  # uses safe loader with retry
-        bal = s.get('balance', 10000.0)
+        s = load_state()
+        bal = s.get('balance', 12066.27)
         positions = s.get('positions', {})
         active_pos = [sym for sym, pos in positions.items() if pos.get('active')]
 
         now_utc = datetime.datetime.utcnow().strftime('%H:%M UTC')
-        msg = f"[SMC Scan {now_utc}] Balance: ${bal:,.2f}"
+        msg = f"📊 [SMC Live Status | {now_utc}]\n"
+        msg += f"💰 Balance: ${bal:,.2f}\n"
+        msg += "─────────────"
+
+        portfolio_tfs = {'BTCUSDT': '30m', 'DOGEUSDT': '15m', 'TRXUSDT': '30m'}
+        total_pnl_usd = 0.0
+
         if active_pos:
-            msg += f" | Open: {', '.join(active_pos)}"
+            for sym in active_pos:
+                pos = positions[sym]
+                tf = portfolio_tfs.get(sym, '30m')
+                direction = pos.get('direction', 'LONG')
+                dir_emoji = 'LONG 📈' if direction == 'LONG' else 'SHORT 📉'
+                pos_type = pos.get('position_type', 'LIMIT')
+                is_filled = pos.get('filled', False)
+
+                msg += f"\n📡 {sym} ({tf}) | {dir_emoji}\n"
+
+                # Fetch latest price
+                df = fetch_data(sym, tf, limit=5)
+                curr_price = df['close'].iloc[-1] if df is not None and not df.empty else pos.get('entry_price', 0)
+
+                entry_p = pos.get('entry_price', 0)
+                sl_p    = pos.get('sl', 0)
+                tp1_p   = pos.get('tp1', 0)
+                tp2_p   = pos.get('tp2', 0)
+                init_sl = pos.get('initial_sl_price', sl_p)
+                tp1_done = pos.get('tp1_done', False)
+
+                if is_filled or pos_type == 'MARKET':
+                    # Calculate live PnL
+                    stop_dist = abs(entry_p - init_sl)
+                    risk_usd = bal * 0.05
+                    if direction == 'LONG':
+                        pnl_pct = ((curr_price - entry_p) / entry_p) * 100 if entry_p > 0 else 0
+                        pnl_usd = ((curr_price - entry_p) / stop_dist) * risk_usd if stop_dist > 0 else 0
+                    else:
+                        pnl_pct = ((entry_p - curr_price) / entry_p) * 100 if entry_p > 0 else 0
+                        pnl_usd = ((entry_p - curr_price) / stop_dist) * risk_usd if stop_dist > 0 else 0
+
+                    total_pnl_usd += pnl_usd
+                    pnl_emoji = '🟢' if pnl_usd >= 0 else '🔴'
+                    status_badge = ' [TP1 Hit ✅]' if tp1_done else ''
+
+                    msg += f"• Status: MARKET (Filled){status_badge}\n"
+                    msg += f"• Entry: {entry_p:.5f} | Current: {curr_price:.5f}\n"
+                    msg += f"• SL: {sl_p:.5f} 🛡️ | TP1: {tp1_p:.5f} | TP2: {tp2_p:.5f}\n"
+                    msg += f"• Live PnL: ${pnl_usd:+.2f} ({pnl_pct:+.2f}%) {pnl_emoji}\n"
+                else:
+                    msg += f"• Status: PENDING LIMIT ORDER ⏳\n"
+                    msg += f"• Entry: {entry_p:.5f} | Current: {curr_price:.5f}\n"
+                    msg += f"• SL: {sl_p:.5f} | TP1: {tp1_p:.5f} | TP2: {tp2_p:.5f}\n"
+
+            msg += "─────────────\n"
+            tot_emoji = '🟢' if total_pnl_usd >= 0 else '🔴'
+            msg += f"📈 Total Floating PnL: ${total_pnl_usd:+.2f} {tot_emoji}"
         else:
-            msg += " | No active positions."
+            msg += "\nℹ️ No active open positions."
 
         send_telegram(msg)
-
         s['last_heartbeat_time'] = time.time()
-        _atomic_write_json(s, _STATE_FILE)  # atomic, no corruption
+        _atomic_write_json(s, _STATE_FILE)
 
 
 def run_continuous_cloud():
