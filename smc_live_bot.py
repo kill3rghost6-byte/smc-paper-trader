@@ -504,11 +504,9 @@ def _settle_trade(state_data, trade, risk, symbol):
 
 
 def run_portfolio():
-    # ── BUG FIX #1: Load state with persistent start_time ─────────────────
     state_data = load_state()
-    paper_start = pd.to_datetime(state_data['start_time'])
+    paper_start = pd.to_datetime(state_data.get('start_time', _FALLBACK_START))
 
-    # Portfolio: all symbols and their correct timeframes
     portfolio = {
         'BTCUSDT':  {'tf': '30m', 'risk': 0.0500},
         'DOGEUSDT': {'tf': '15m', 'risk': 0.0500},
@@ -531,56 +529,168 @@ def run_portfolio():
             if pd.isna(tick):
                 tick = 0.0001
 
-            df    = compute_indicators(df)
-            state = get_live_state(df, tick, symbol)
+            df = compute_indicators(df)
+            current_pos = state_data.get('positions', {}).get(symbol, {})
 
-            # ── BUG FIX #2: Settle ALL completed trades not yet accounted ──
-            trade_closed = False
-            for trade in state['completed_trades']:
-                exit_time = pd.to_datetime(trade['exit_time'])
-                # Only count trades after our paper-trading start date
-                # and trades we have NOT already settled (history_ids guard)
-                if exit_time >= paper_start and trade['id'] not in state_data['history_ids']:
-                    _settle_trade(state_data, trade, risk, symbol)
-                    trade_closed = True
-                    any_action   = True
+            if current_pos.get('active') and 'entry_price' in current_pos:
+                recent_df = df.iloc[-20:]
+                direction     = current_pos.get('direction', 'LONG')
+                entry_price   = current_pos.get('entry_price', 0)
+                sl            = current_pos.get('sl', 0)
+                tp1           = current_pos.get('tp1', 0)
+                tp2           = current_pos.get('tp2', 0)
+                tp1_done      = current_pos.get('tp1_done', False)
+                initial_sl    = current_pos.get('initial_sl_price', sl)
+                pos_type      = current_pos.get('position_type', 'LIMIT')
+                is_filled     = current_pos.get('filled', False)
 
-            # ── BUG FIX #3: Always sync positions flag with reality ────────
-            # position==0 AND limit_type==0 means truly flat
-            is_active = (state['position'] != 0) or (state['limit_type'] != 0)
-            state_data['positions'][symbol] = {'active': is_active}
+                # Step A: Limit order pending fill
+                if pos_type == 'LIMIT' and not is_filled:
+                    for idx, row in recent_df.iterrows():
+                        r_h, r_l = row['high'], row['low']
+                        if direction == 'LONG':
+                            if r_l <= entry_price:
+                                current_pos['filled'] = True
+                                current_pos['position_type'] = 'MARKET'
+                                is_filled = True
+                                send_telegram(f"🔔 [SMC] {symbol} LONG Limit Order FILLED at {entry_price:.5f}!")
+                                any_action = True
+                                break
+                            elif r_h >= tp2:
+                                state_data['positions'][symbol] = {'active': False}
+                                send_telegram(f"ℹ️ [SMC] {symbol} Limit order cancelled (Target TP2 reached before pullback).")
+                                any_action = True
+                                break
+                        elif direction == 'SHORT':
+                            if r_h >= entry_price:
+                                current_pos['filled'] = True
+                                current_pos['position_type'] = 'MARKET'
+                                is_filled = True
+                                send_telegram(f"🔔 [SMC] {symbol} SHORT Limit Order FILLED at {entry_price:.5f}!")
+                                any_action = True
+                                break
+                            elif r_l <= tp2:
+                                state_data['positions'][symbol] = {'active': False}
+                                send_telegram(f"ℹ️ [SMC] {symbol} Limit order cancelled (Target TP2 reached before pullback).")
+                                any_action = True
+                                break
 
-            if is_active:
-                any_action = True
-                msg = f"📡 {symbol} ({tf}) | SMC Update\n"
-                if state['position'] != 0:
-                    direction = 'LONG 🟢' if state['position'] == 1 else 'SHORT 🔴'
-                    msg += f"IN POSITION: {direction}\n"
-                    msg += f"Entry: {state['entry_price']:.5f} | SL: {state['sl']:.5f}\n"
-                    msg += f"TP1 hit: {'Yes ✅' if state['tp1_done'] else 'No'} | "
-                    msg += f"SL@BE: {'Yes 🛡️' if state['sl_moved_to_be'] else 'No ⚠️'}"
-                else:  # limit order waiting
-                    direction = 'LONG 🟢' if state['limit_type'] == 1 else 'SHORT 🔴'
-                    msg += f"LIMIT ORDER: {direction} | Risk {risk*100:.1f}%\n"
-                    msg += f"Entry: {state['entry_price']:.5f} | SL: {state['sl']:.5f}\n"
+                # Step B: Monitor active filled position
+                if current_pos.get('active') and (is_filled or current_pos.get('position_type') == 'MARKET'):
+                    latest_high = df['high'].iloc[-1]
+                    latest_low  = df['low'].iloc[-1]
+
+                    if direction == 'LONG':
+                        if latest_high >= tp1 and not current_pos.get('tp1_done'):
+                            current_pos['tp1_done'] = True
+                            current_pos['sl'] = entry_price
+                            current_pos['sl_moved_to_be'] = True
+                            send_telegram(f"🎯 [SMC] {symbol} LONG TP1 Hit at {latest_high:.5f}! SL moved to Break-Even ({entry_price:.5f}).")
+                            any_action = True
+
+                        hit_sl  = latest_low <= current_pos['sl']
+                        hit_tp2 = latest_high >= tp2
+
+                        if hit_sl or hit_tp2:
+                            exit_price = current_pos['sl'] if hit_sl else tp2
+                            risk_amount = entry_price - initial_sl
+                            r_exit = (exit_price - entry_price) / risk_amount if risk_amount != 0 else 0
+                            if current_pos.get('tp1_done'):
+                                r_tp1 = (tp1 - entry_price) / risk_amount if risk_amount != 0 else 0
+                                r_mult = (0.75 * r_tp1) + (0.25 * r_exit)
+                            else:
+                                r_mult = r_exit
+
+                            trade_record = {
+                                'id': f"{symbol}_{time.time()}",
+                                'symbol': symbol,
+                                'entry_time': current_pos.get('entry_time', str(df.index[0])),
+                                'exit_time': str(df.index[-1]),
+                                'direction': 'LONG',
+                                'r_multiple': r_mult
+                            }
+                            _settle_trade(state_data, trade_record, risk, symbol)
+                            state_data['positions'][symbol] = {'active': False}
+                            any_action = True
+
+                    elif direction == 'SHORT':
+                        if latest_low <= tp1 and not current_pos.get('tp1_done'):
+                            current_pos['tp1_done'] = True
+                            current_pos['sl'] = entry_price
+                            current_pos['sl_moved_to_be'] = True
+                            send_telegram(f"🎯 [SMC] {symbol} SHORT TP1 Hit at {latest_low:.5f}! SL moved to Break-Even ({entry_price:.5f}).")
+                            any_action = True
+
+                        hit_sl  = latest_high >= current_pos['sl']
+                        hit_tp2 = latest_low <= tp2
+
+                        if hit_sl or hit_tp2:
+                            exit_price = current_pos['sl'] if hit_sl else tp2
+                            risk_amount = initial_sl - entry_price
+                            r_exit = (entry_price - exit_price) / risk_amount if risk_amount != 0 else 0
+                            if current_pos.get('tp1_done'):
+                                r_tp1 = (entry_price - tp1) / risk_amount if risk_amount != 0 else 0
+                                r_mult = (0.75 * r_tp1) + (0.25 * r_exit)
+                            else:
+                                r_mult = r_exit
+
+                            trade_record = {
+                                'id': f"{symbol}_{time.time()}",
+                                'symbol': symbol,
+                                'entry_time': current_pos.get('entry_time', str(df.index[0])),
+                                'exit_time': str(df.index[-1]),
+                                'direction': 'SHORT',
+                                'r_multiple': r_mult
+                            }
+                            _settle_trade(state_data, trade_record, risk, symbol)
+                            state_data['positions'][symbol] = {'active': False}
+                            any_action = True
+
+            else:
+                # No active position saved — scan candles for new entry or pending limit
+                state = get_live_state(df, tick, symbol)
+
+                for trade in state['completed_trades']:
+                    exit_time = pd.to_datetime(trade['exit_time'])
+                    if exit_time >= paper_start and trade['id'] not in state_data['history_ids']:
+                        _settle_trade(state_data, trade, risk, symbol)
+                        any_action = True
+
+                is_active = (state['position'] != 0) or (state['limit_type'] != 0)
+                if is_active:
+                    direction_str = 'LONG' if (state['position'] != 0 and state['position'] == 1) or (state['limit_type'] == 1) else 'SHORT'
+                    state_data['positions'][symbol] = {
+                        'active': True,
+                        'symbol': symbol,
+                        'direction': direction_str,
+                        'position_type': 'MARKET' if state['position'] != 0 else 'LIMIT',
+                        'filled': state['position'] != 0,
+                        'entry_price': float(state['entry_price']),
+                        'sl': float(state['sl']),
+                        'tp1': float(state['tp1']),
+                        'tp2': float(state['tp2']),
+                        'initial_sl_price': float(state['sl']),
+                        'tp1_done': bool(state['tp1_done']),
+                        'sl_moved_to_be': bool(state['sl_moved_to_be']),
+                        'entry_time': str(df.index[-1])
+                    }
+                    any_action = True
+                    msg = f"📡 {symbol} ({tf}) | New Setup Activated!\n"
+                    msg += f"Type: {direction_str} | Entry: {state['entry_price']:.5f} | SL: {state['sl']:.5f}\n"
                     msg += f"TP1: {state['tp1']:.5f} | TP2: {state['tp2']:.5f}"
-                send_telegram(msg)
+                    send_telegram(msg)
+                else:
+                    state_data['positions'][symbol] = {'active': False}
 
         except Exception as e:
             print(f"[ERROR] {symbol}: {e}")
             send_telegram(f"❌ Error processing {symbol}: {e}")
             any_action = True
 
-    # Save State
-    save_and_push_state(state_data, _STATE_FILE)
+    _atomic_write_json(state_data, _STATE_FILE)
 
-    # ── BUG FIX #4: Balance notification only when it actually changed ─────
     if state_data['balance'] != initial_balance:
-        send_telegram(
-            f"💰 BALANCE UPDATE\n"
-            f"Change: ${state_data['balance'] - initial_balance:+.2f}\n"
-            f"New Balance: ${state_data['balance']:.2f}"
-        )
+        send_telegram(f"💰 BALANCE UPDATE\nChange: ${state_data['balance'] - initial_balance:+.2f}\nNew Balance: ${state_data['balance']:.2f}")
 
 def _git_push_state():
     """Push state.json to GitHub (used in continuous-cloud mode).

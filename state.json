@@ -1,32 +1,58 @@
 {
-    "balance": 12066.269967153188,
+    "balance": 12066.27,
     "start_time": "2026-06-27T00:00:00",
     "history_ids": [
         "BTCUSDT_1783206000.0",
         "DOGEUSDT_1783429200.0",
         "BTCUSDT_1783429200.0",
-        "BTCUSDT_1783600200.0",
-        "DOGEUSDT_1783604700.0",
-        "TRXUSDT_1783666800.0",
-        "BTCUSDT_1783783800.0",
-        "TRXUSDT_1783935000.0",
-        "BTCUSDT_1784066400.0",
-        "DOGEUSDT_1784099700.0",
-        "DOGEUSDT_1784118600.0",
-        "DOGEUSDT_1784461500.0",
-        "DOGEUSDT_1784499300.0",
         "TRXUSDT_1784451600.0"
     ],
     "positions": {
         "BTCUSDT": {
-            "active": false
+            "active": true,
+            "symbol": "BTCUSDT",
+            "direction": "LONG",
+            "position_type": "MARKET",
+            "filled": true,
+            "entry_price": 65856.1,
+            "sl": 65527.32316,
+            "tp1": 66349.26525,
+            "tp2": 67171.20734,
+            "initial_sl_price": 65527.32316,
+            "tp1_done": false,
+            "sl_moved_to_be": false,
+            "entry_time": "2026-07-22 06:00:00"
         },
         "DOGEUSDT": {
-            "active": false
+            "active": true,
+            "symbol": "DOGEUSDT",
+            "direction": "LONG",
+            "position_type": "MARKET",
+            "filled": true,
+            "entry_price": 0.07248,
+            "sl": 0.07203,
+            "tp1": 0.07316,
+            "tp2": 0.07429,
+            "initial_sl_price": 0.07203,
+            "tp1_done": false,
+            "sl_moved_to_be": false,
+            "entry_time": "2026-07-22 05:45:00"
         },
         "TRXUSDT": {
-            "active": true
+            "active": true,
+            "symbol": "TRXUSDT",
+            "direction": "LONG",
+            "position_type": "MARKET",
+            "filled": true,
+            "entry_price": 0.32907,
+            "sl": 0.32907,
+            "tp1": 0.33044,
+            "tp2": 0.33276,
+            "initial_sl_price": 0.32812,
+            "tp1_done": true,
+            "sl_moved_to_be": true,
+            "entry_time": "2026-07-22 07:00:00"
         }
     },
-    "last_heartbeat_time": 1784718395.5475886
+    "last_heartbeat_time": 1784718020.2019649
 }
