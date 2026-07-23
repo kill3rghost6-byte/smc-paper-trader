@@ -1,5 +1,5 @@
 {
-    "balance": 13409.91790318821,
+    "balance": 14056.203647023889,
     "start_time": "2026-06-27T00:00:00",
     "history_ids": [
         "BTCUSDT_1783206000.0",
@@ -10,7 +10,8 @@
         "BTCUSDT_1784727000.0",
         "TRXUSDT_1784696400.0",
         "DOGEUSDT_1784791510.925598",
-        "DOGEUSDT_1784798230.7747684"
+        "DOGEUSDT_1784798230.7747684",
+        "DOGEUSDT_1784780100.0"
     ],
     "positions": {
         "BTCUSDT": {
@@ -23,5 +24,5 @@
             "active": false
         }
     },
-    "last_heartbeat_time": 1784798232.0974846
+    "last_heartbeat_time": 1784799192.8182204
 }
