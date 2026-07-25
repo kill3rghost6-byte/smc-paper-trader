@@ -12,7 +12,8 @@
         "DOGEUSDT_1784791510.925598",
         "DOGEUSDT_1784798230.7747684",
         "DOGEUSDT_1784780100.0",
-        "DOGEUSDT_1784954264.7581959"
+        "DOGEUSDT_1784954264.7581959",
+        "DOGEUSDT_1784913300.0"
     ],
     "positions": {
         "BTCUSDT": {
@@ -25,5 +26,5 @@
             "active": false
         }
     },
-    "last_heartbeat_time": 1784954266.0200949
+    "last_heartbeat_time": 1784955225.7328086
 }
