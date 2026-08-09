@@ -49,26 +49,26 @@
     ],
     "positions": {
         "BTCUSDT": {
-            "active": true,
-            "symbol": "BTCUSDT",
-            "direction": "LONG",
-            "position_type": "LIMIT",
-            "filled": false,
-            "entry_price": 64797.3,
-            "sl": 64747.82579488785,
-            "tp1": 64871.51130766823,
-            "tp2": 64995.196820448604,
-            "initial_sl_price": 64747.82579488785,
-            "tp1_done": true,
-            "sl_moved_to_be": false,
-            "entry_time": "2026-08-09 06:00:00"
+            "active": false
         },
         "DOGEUSDT": {
             "active": false
         },
         "TRXUSDT": {
-            "active": false
+            "active": true,
+            "symbol": "TRXUSDT",
+            "direction": "LONG",
+            "position_type": "MARKET",
+            "filled": true,
+            "entry_price": 0.3300449999999999,
+            "sl": 0.3300449999999999,
+            "tp1": 0.33040311520368015,
+            "tp2": 0.3310333072098137,
+            "initial_sl_price": 0.3300449999999999,
+            "tp1_done": true,
+            "sl_moved_to_be": true,
+            "entry_time": "2026-08-09 06:00:00"
         }
     },
-    "last_heartbeat_time": 1786257366.3131418
+    "last_heartbeat_time": 1786258325.2734413
 }
