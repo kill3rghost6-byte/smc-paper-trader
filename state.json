@@ -65,17 +65,17 @@
             "position_type": "MARKET",
             "filled": true,
             "entry_price": 0.070275,
-            "sl": 0.07002980990148897,
+            "sl": 0.070275,
             "tp1": 0.07064278514776656,
             "tp2": 0.07125576039404416,
             "initial_sl_price": 0.07002980990148897,
-            "tp1_done": false,
-            "sl_moved_to_be": false,
+            "tp1_done": true,
+            "sl_moved_to_be": true,
             "entry_time": "2026-08-11 09:15:00"
         },
         "TRXUSDT": {
             "active": false
         }
     },
-    "last_heartbeat_time": 1786442006.275035
+    "last_heartbeat_time": 1786442966.2454712
 }
