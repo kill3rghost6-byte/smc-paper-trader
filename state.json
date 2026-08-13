@@ -67,8 +67,20 @@
             "active": false
         },
         "TRXUSDT": {
-            "active": false
+            "active": true,
+            "symbol": "TRXUSDT",
+            "direction": "LONG",
+            "position_type": "LIMIT",
+            "filled": false,
+            "entry_price": 0.335955,
+            "sl": 0.3349562865553971,
+            "tp1": 0.33745307016690435,
+            "tp2": 0.3399498537784116,
+            "initial_sl_price": 0.3349562865553971,
+            "tp1_done": false,
+            "sl_moved_to_be": false,
+            "entry_time": "2026-08-12 23:30:00"
         }
     },
-    "last_heartbeat_time": 1786578566.500275
+    "last_heartbeat_time": 1786579527.2668397
 }
