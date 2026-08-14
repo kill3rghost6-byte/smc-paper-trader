@@ -80,7 +80,19 @@
             "entry_time": "2026-08-13 15:30:00"
         },
         "DOGEUSDT": {
-            "active": false
+            "active": true,
+            "symbol": "DOGEUSDT",
+            "direction": "SHORT",
+            "position_type": "LIMIT",
+            "filled": false,
+            "entry_price": 0.069935,
+            "sl": 0.07009862406221228,
+            "tp1": 0.06968956390668157,
+            "tp2": 0.06928050375115088,
+            "initial_sl_price": 0.07009862406221228,
+            "tp1_done": false,
+            "sl_moved_to_be": false,
+            "entry_time": "2026-08-14 06:15:00"
         },
         "TRXUSDT": {
             "active": true,
@@ -98,5 +110,5 @@
             "entry_time": "2026-08-14 03:30:00"
         }
     },
-    "last_heartbeat_time": 1786688192.2930765
+    "last_heartbeat_time": 1786689200.457898
 }
