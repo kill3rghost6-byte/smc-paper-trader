@@ -73,7 +73,8 @@
         "TRXUSDT_1786959405.9334512",
         "TRXUSDT_1786811400.0",
         "BTCUSDT_1787151708.1837943",
-        "TRXUSDT_1787196924.2845764"
+        "TRXUSDT_1787196924.2845764",
+        "TRXUSDT_1787135400.0"
     ],
     "positions": {
         "BTCUSDT": {
@@ -86,5 +87,5 @@
             "active": false
         }
     },
-    "last_heartbeat_time": 1787196925.9440506
+    "last_heartbeat_time": 1787197885.3141513
 }
