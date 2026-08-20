@@ -88,14 +88,14 @@
             "position_type": "MARKET",
             "filled": true,
             "entry_price": 0.33269000000000004,
-            "sl": 0.3313026502485423,
+            "sl": 0.33269000000000004,
             "tp1": 0.33477102462718666,
             "tp2": 0.3382393990058311,
             "initial_sl_price": 0.3313026502485423,
-            "tp1_done": false,
-            "sl_moved_to_be": false,
+            "tp1_done": true,
+            "sl_moved_to_be": true,
             "entry_time": "2026-08-19 04:00:00"
         }
     },
-    "last_heartbeat_time": 1787185372.7816489
+    "last_heartbeat_time": 1787186333.15997
 }
