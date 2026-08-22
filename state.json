@@ -89,8 +89,8 @@
             "active": true,
             "symbol": "DOGEUSDT",
             "direction": "SHORT",
-            "position_type": "LIMIT",
-            "filled": false,
+            "position_type": "MARKET",
+            "filled": true,
             "entry_price": 0.090975,
             "sl": 0.09298636183905006,
             "tp1": 0.08795795724142491,
@@ -104,5 +104,5 @@
             "active": false
         }
     },
-    "last_heartbeat_time": 1787409418.8510995
+    "last_heartbeat_time": 1787410378.7203863
 }
