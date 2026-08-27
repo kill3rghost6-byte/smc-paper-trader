@@ -104,12 +104,12 @@
             "position_type": "MARKET",
             "filled": true,
             "entry_price": 78957.0,
-            "sl": 78410.51006959211,
+            "sl": 78957.0,
             "tp1": 79774.23489561182,
             "tp2": 81137.95972163155,
             "initial_sl_price": 78410.51006959211,
-            "tp1_done": false,
-            "sl_moved_to_be": false,
+            "tp1_done": true,
+            "sl_moved_to_be": true,
             "entry_time": "2026-08-27 13:30:00"
         },
         "DOGEUSDT": {
@@ -119,5 +119,5 @@
             "active": false
         }
     },
-    "last_heartbeat_time": 1787840260.210965
+    "last_heartbeat_time": 1787841220.3632221
 }
