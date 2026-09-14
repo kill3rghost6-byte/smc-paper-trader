@@ -156,8 +156,8 @@
             "active": true,
             "symbol": "TRXUSDT",
             "direction": "LONG",
-            "position_type": "LIMIT",
-            "filled": false,
+            "position_type": "MARKET",
+            "filled": true,
             "entry_price": 0.33839,
             "sl": 0.33590201883210347,
             "tp1": 0.3421219717518449,
@@ -168,5 +168,5 @@
             "entry_time": "2026-09-14 01:00:00"
         }
     },
-    "last_heartbeat_time": 1789349956.424351
+    "last_heartbeat_time": 1789350916.5640054
 }
