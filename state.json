@@ -1,5 +1,5 @@
 {
-    "balance": 415538.9311941492,
+    "balance": 459689.94263352756,
     "start_time": "2026-06-27T00:00:00",
     "history_ids": [
         "BTCUSDT_1783206000.0",
@@ -148,30 +148,31 @@
         "DOGEUSDT_1789923163.4946523",
         "DOGEUSDT_1789907400.0",
         "BTCUSDT_1789951035.0199792",
-        "BTCUSDT_1789941600.0"
+        "BTCUSDT_1789941600.0",
+        "BTCUSDT_1789981840.114549"
     ],
     "positions": {
         "BTCUSDT": {
-            "active": true,
-            "symbol": "BTCUSDT",
-            "direction": "LONG",
-            "position_type": "MARKET",
-            "filled": true,
-            "entry_price": 81699.75,
-            "sl": 81233.04249561563,
-            "tp1": 82399.81125657655,
-            "tp2": 83566.58001753746,
-            "initial_sl_price": 81233.04249561563,
-            "tp1_done": false,
-            "sl_moved_to_be": false,
-            "entry_time": "2026-09-21 08:00:00"
+            "active": false
         },
         "DOGEUSDT": {
             "active": false
         },
         "TRXUSDT": {
-            "active": false
+            "active": true,
+            "symbol": "TRXUSDT",
+            "direction": "LONG",
+            "position_type": "LIMIT",
+            "filled": false,
+            "entry_price": 0.343345,
+            "sl": 0.3424956999370037,
+            "tp1": 0.3446189500944945,
+            "tp2": 0.3467422002519853,
+            "initial_sl_price": 0.3424956999370037,
+            "tp1_done": false,
+            "sl_moved_to_be": false,
+            "entry_time": "2026-09-21 08:30:00"
         }
     },
-    "last_heartbeat_time": 1789980880.16781
+    "last_heartbeat_time": 1789981845.7158566
 }
