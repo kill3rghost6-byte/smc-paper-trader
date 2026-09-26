@@ -164,8 +164,8 @@
             "active": true,
             "symbol": "BTCUSDT",
             "direction": "SHORT",
-            "position_type": "LIMIT",
-            "filled": false,
+            "position_type": "MARKET",
+            "filled": true,
             "entry_price": 84081.95000000001,
             "sl": 84661.87686555483,
             "tp1": 83212.05970166778,
@@ -194,5 +194,5 @@
             "active": false
         }
     },
-    "last_heartbeat_time": 1790417542.1527035
+    "last_heartbeat_time": 1790418503.7098277
 }
