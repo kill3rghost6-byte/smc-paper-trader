@@ -185,7 +185,8 @@
         "DOGEUSDT_1791116723.2317057",
         "DOGEUSDT_1791077400.0",
         "TRXUSDT_1791160949.2494335",
-        "TRXUSDT_1791162872.254438"
+        "TRXUSDT_1791162872.254438",
+        "TRXUSDT_1791177301.02156"
     ],
     "positions": {
         "BTCUSDT": {
@@ -195,20 +196,8 @@
             "active": false
         },
         "TRXUSDT": {
-            "active": true,
-            "symbol": "TRXUSDT",
-            "direction": "LONG",
-            "position_type": "MARKET",
-            "filled": true,
-            "entry_price": 0.3351349999999999,
-            "sl": 0.3351349999999999,
-            "tp1": 0.3357265102851913,
-            "tp2": 0.33674569409384353,
-            "initial_sl_price": 0.3351349999999999,
-            "tp1_done": true,
-            "sl_moved_to_be": true,
-            "entry_time": "2026-10-05 01:00:00"
+            "active": false
         }
     },
-    "last_heartbeat_time": 1791176343.4841495
+    "last_heartbeat_time": 1791177302.9824097
 }
