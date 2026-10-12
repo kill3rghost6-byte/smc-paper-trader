@@ -221,17 +221,17 @@
             "active": true,
             "symbol": "TRXUSDT",
             "direction": "SHORT",
-            "position_type": "LIMIT",
-            "filled": false,
+            "position_type": "MARKET",
+            "filled": true,
             "entry_price": 0.330015,
-            "sl": 0.33052293464630084,
+            "sl": 0.330015,
             "tp1": 0.32925309803054875,
             "tp2": 0.32798326141479667,
             "initial_sl_price": 0.33052293464630084,
-            "tp1_done": false,
-            "sl_moved_to_be": false,
+            "tp1_done": true,
+            "sl_moved_to_be": true,
             "entry_time": "2026-10-12 23:00:00"
         }
     },
-    "last_heartbeat_time": 1791848579.855628
+    "last_heartbeat_time": 1791849539.2375505
 }
