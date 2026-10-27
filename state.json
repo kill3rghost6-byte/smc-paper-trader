@@ -231,7 +231,19 @@
     ],
     "positions": {
         "BTCUSDT": {
-            "active": false
+            "active": true,
+            "symbol": "BTCUSDT",
+            "direction": "LONG",
+            "position_type": "LIMIT",
+            "filled": false,
+            "entry_price": 80083.15,
+            "sl": 79375.02494286375,
+            "tp1": 81145.33758570437,
+            "tp2": 82915.65022854498,
+            "initial_sl_price": 79375.02494286375,
+            "tp1_done": false,
+            "sl_moved_to_be": false,
+            "entry_time": "2026-10-27 21:30:00"
         },
         "DOGEUSDT": {
             "active": true,
@@ -252,5 +264,5 @@
             "active": false
         }
     },
-    "last_heartbeat_time": 1793138306.4220088
+    "last_heartbeat_time": 1793139269.3819041
 }
