@@ -264,8 +264,8 @@
             "active": true,
             "symbol": "BTCUSDT",
             "direction": "SHORT",
-            "position_type": "LIMIT",
-            "filled": false,
+            "position_type": "MARKET",
+            "filled": true,
             "entry_price": 75859.45,
             "sl": 76042.36787585313,
             "tp1": 75585.0731862203,
@@ -279,8 +279,8 @@
             "active": true,
             "symbol": "DOGEUSDT",
             "direction": "SHORT",
-            "position_type": "LIMIT",
-            "filled": false,
+            "position_type": "MARKET",
+            "filled": true,
             "entry_price": 0.07117499999999999,
             "sl": 0.07135363124801015,
             "tp1": 0.07090705312798473,
@@ -294,5 +294,5 @@
             "active": false
         }
     },
-    "last_heartbeat_time": 1794120379.5194874
+    "last_heartbeat_time": 1794121339.542489
 }
