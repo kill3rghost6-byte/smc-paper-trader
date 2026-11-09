@@ -270,8 +270,8 @@
             "active": true,
             "symbol": "BTCUSDT",
             "direction": "LONG",
-            "position_type": "LIMIT",
-            "filled": false,
+            "position_type": "MARKET",
+            "filled": true,
             "entry_price": 74779.95,
             "sl": 74148.88134005867,
             "tp1": 75726.55298991199,
@@ -300,5 +300,5 @@
             "active": false
         }
     },
-    "last_heartbeat_time": 1794256934.0009928
+    "last_heartbeat_time": 1794257895.8286817
 }
